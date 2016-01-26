@@ -47,5 +47,3 @@ Write-Output "$($id);$($hn);$($os.Version);$($bios.SMBIOSBIOSVersion);$($bios.Ve
 Write-Output $ipconfig $route $date " " >> Inventory\details\$hn\detailedNetwork.txt
 Write-Output $hn $user $system $bios $date " " >> Inventory\details\$hn\detailedSystem.txt
 Write-Output $hn $os $bios $IE $firefox $chrome $flash $java $date " " >> Inventory\details\$hn\detailedVersion.txt
-
-#Copy-Item -Recurse $env:USERPROFILE\AppData\Roaming\TeamViewer Inventory\details\$hn
