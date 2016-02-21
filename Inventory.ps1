@@ -1,6 +1,7 @@
 ﻿#Details Folder
-$dirDetail = Test-Path .\Inventory\details\$hn
-if ($dirDetail = "True") {Write-Output "Writing to: Inventory\details\$hn"} else {mkdir .\Inventory\details\$hn}
+$hn = hostname
+$dirDetail = Test-Path ".\Inventory\details\$hn"
+if ($dirDetail -eq "True") {Write-Output "Writing to: Inventory\details\$hn"} else {mkdir .\Inventory\details\$hn}
 
 #ID
 $ipv4add = ipconfig | where-object {$_ -match "IPv4 Address"} | foreach-object{$_.Split(":")[1]}
@@ -12,13 +13,16 @@ $id = "$($oct2)$($oct3)"
 
 
 #Variables
-$hn = hostname
 $network = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -ComputerName 127.0.0.1 -Filter "IpEnabled = TRUE"
-$netAdapter = get-wmiobject win32_networkadapter -filter "netconnectionstatus = 2" | select AdapterType | Select -first 1
+if ($network.Description -like "*Wireless*") {
+        $netAdapter = "Wireless"
+    } else {
+        $netAdapter = Get-WmiObject win32_networkadapter -filter "netconnectionstatus = 2" | select AdapterType | Select -first 1
+    }
 $ipconfig = ipconfig /all
 $route = route print
 $system = Get-WmiObject -Class Win32_computerSystem
-$memory = Get-WmiObject Win32_computersystem | foreach-object {[math]::round($_.totalPhysicalMemory / 1GB,2)} <#displays the amount of system memory ronded to the hundredths place#>
+$memory = Get-WmiObject Win32_computersystem | foreach-object {[math]::round($_.totalPhysicalMemory / 1GB,2)} <#displays the amount of system memory rounded to the hundredths place#>
 $bios = Get-WmiObject Win32_bios
 $user = $env:username
 $date =  Get-Date -format s
@@ -47,11 +51,11 @@ $WINSBackup = if ([string]::IsNullOrEmpty($network.WINSSecondaryServer)) {Write-
 
 
 
-<#Makes two csv files. 
-Inventory.csv: has most system and network information. 
-Version.csv: has aplication and OS versions such as Firefox or Windows.
-'': represent a blank space to be manual filled in later#>
-Write-Output "$($id);$($hn);$($network.DHCPEnabled);$($network.IPAddress<#$ipv4add#>);$($network.IPSubnet);$($network.DefaultIPGateway);$($network.DNSServerSearchOrder[0]);$($network.DNSServerSearchOrder[1]);$($WINS);$($WINSBackup);$($system.Domain);$($network.MACAddress);$($network.Description);$($netAdapter.AdapterType);'';'';'';'';'';$($user);'';$($system.Manufacturer);$($system.Model);'';'';$($bios.SerialNumber);'';$($memory)GB;$($system.SystemType);$($date);" >> Inventory\Inventory.txt
+<#Makes two txt files. 
+Inventory.txt: has most system and network information. 
+Version.txt: has application and OS versions such as Firefox or Windows.
+'': represents a blank space to be manually filled in later#>
+Write-Output "$($id);$($hn);$($network.DHCPEnabled);$($network.IPAddress<#$ipv4add#>);$($network.IPSubnet);$($network.DefaultIPGateway);$($network.DNSServerSearchOrder[0]);$($network.DNSServerSearchOrder[1]);$($WINS);$($WINSBackup);$($system.Domain);$($network.MACAddress);$($network.Description);$($netAdapter);'';'';'';'';'';$($user);'';$($system.Manufacturer);$($system.Model);'';'';$($bios.SerialNumber);'';$($memory)GB;$($system.SystemType);$($date);" >> Inventory\Inventory.txt
 Write-Output "$($id);$($hn);$($os.Version);$($os.BuildNumber);$($bios.SMBIOSBIOSVersion);$($bios.Version);$($bios.Name);$($IE.Version);$($firefoxDV);$($chromeV);$($flashCV);$($javaV);$($PSVersionTable.PSVersion);$($date);" >> Inventory\Version.txt
 
 #Makes three text files with detailed information about computer.
