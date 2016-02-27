@@ -44,6 +44,7 @@ Else {
 $firefoxDV = if ([string]::IsNullOrEmpty($firefox.DisplayVersion)) {Write-Output 'NULL'} else {Write-Output $firefox.DisplayVersion}
 $chromeV = if ([string]::IsNullOrEmpty($chrome.Version)) {Write-Output 'NULL'} else {Write-Output $chrome.Version}
 $flashCV = if ([string]::IsNullOrEmpty($flash.CurrentVersion)) {Write-Output 'NULL'} else {Write-Output $flash.CurrentVersion}
+      $flashCV = $flashCV.Replace(",",".")
 $javaV = if ([string]::IsNullOrEmpty($java)) {Write-Output 'NULL'} else {Write-Output $java | Select -Expand Version -Last 1}
 $FirstIP = if ([string]::IsNullOrEmpty($network.IPAddress[0])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[0]}
 $SecondIP = if ([string]::IsNullOrEmpty($network.IPAddress[1])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[1]}
@@ -57,11 +58,11 @@ $DNSBackup = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[2])) {Wri
 
 
 <#Makes two txt files. 
-Inventory.txt: has most system and network information. 
-Version.txt: has application and OS versions such as Firefox or Windows.
+Inventory.csv: has most system and network information. 
+Version.csv: has application and OS versions such as Firefox or Windows.
 '': represents a blank space to be manually filled in later#>
-Write-Output "$($id);$($hn);$($network.DHCPEnabled[0]);$($FirstIP);$($FirstSub);$($SecondIP);$($SecondSub);$($network.DefaultIPGateway);$($DNS);$($DNSBackup);$($WINS);$($WINSBackup);$($system.Domain);$($network.MACAddress);$($network.Description);$($netAdapter.AdapterType);'';'';'';'';'';$($user);'';$($system.Manufacturer);$($system.Model);'';'';$($bios.SerialNumber);'';$($memory)GB;$($system.SystemType);$($date);" >> Inventory\Inventory.txt
-Write-Output "$($id);$($hn);$($os.Version);$($os.BuildNumber);$($bios.SMBIOSBIOSVersion);$($bios.Version);$($bios.Name);$($IE.Version);$($firefoxDV);$($chromeV);$($flashCV);$($javaV);$($PSVersionTable.PSVersion);$($date);" >> Inventory\Version.txt
+Write-Output "$($id),$($hn),$($network.DHCPEnabled[0]),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter.AdapterType),'','','','','',$($user),'',$($system.Manufacturer),$($system.Model),'','',$($bios.SerialNumber),'',$($memory)GB,$($system.SystemType),$($date)," >> Inventory\Inventory.csv
+Write-Output "$($id),$($hn),$($os.Version),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.Version),$($firefoxDV),$($chromeV),$($flashCV),$($javaV),$($PSVersionTable.PSVersion),$($date)," >> Inventory\Version.csv
 
 #Makes three text files with detailed information about computer.
 Write-Output $ipconfig $netAdapter $route $date " " >> Inventory\details\$hn\detailedNetwork.txt
