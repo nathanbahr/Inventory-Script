@@ -60,7 +60,7 @@ $DNSBackup = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[2])) {Wri
 Inventory.txt: has most system and network information. 
 Version.txt: has application and OS versions such as Firefox or Windows.
 '': represents a blank space to be manually filled in later#>
-Write-Output "$($id);$($hn);$($network.DHCPEnabled);$($FirstIP);$($FirstSub);$($SecondIP);$($SecondSub);$($network.DefaultIPGateway);$($DNS);$($DNSBackup);$($WINS);$($WINSBackup);$($system.Domain);$($network.MACAddress);$($network.Description);$($netAdapter.AdapterType);'';'';'';'';'';$($user);'';$($system.Manufacturer);$($system.Model);'';'';$($bios.SerialNumber);'';$($memory)GB;$($system.SystemType);$($date);" >> Inventory\Inventory.txt
+Write-Output "$($id);$($hn);$($network.DHCPEnabled[0]);$($FirstIP);$($FirstSub);$($SecondIP);$($SecondSub);$($network.DefaultIPGateway);$($DNS);$($DNSBackup);$($WINS);$($WINSBackup);$($system.Domain);$($network.MACAddress);$($network.Description);$($netAdapter.AdapterType);'';'';'';'';'';$($user);'';$($system.Manufacturer);$($system.Model);'';'';$($bios.SerialNumber);'';$($memory)GB;$($system.SystemType);$($date);" >> Inventory\Inventory.txt
 Write-Output "$($id);$($hn);$($os.Version);$($os.BuildNumber);$($bios.SMBIOSBIOSVersion);$($bios.Version);$($bios.Name);$($IE.Version);$($firefoxDV);$($chromeV);$($flashCV);$($javaV);$($PSVersionTable.PSVersion);$($date);" >> Inventory\Version.txt
 
 #Makes three text files with detailed information about computer.
