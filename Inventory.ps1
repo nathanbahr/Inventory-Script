@@ -4,11 +4,10 @@ $dirDetail = Test-Path ".\Inventory\details\$hn"
 if ($dirDetail -eq "True") {Write-Output "Writing to: Inventory\details\$hn"} else {mkdir .\Inventory\details\$hn}
 
 #ID
-$ipv4add = ipconfig | where-object {$_ -match "IPv4 Address"} | foreach-object{$_.Split(":")[1]}
-$ipv6add = ipconfig | where-object {$_ -match "IPv6 Address. . . . . . . . . . . :"} <#| foreach-object{$_.Split(":")[1]}#>
+$ipID = ipconfig | where-object {$_ -match "IPv4 Address"} | foreach-object{$_.Split(":")[1]}
 
-$oct2 = $ipv4add.trim().Split(".")[2]
-$oct3 = $ipv4add.trim().Split(".")[3]
+$oct2 = $ipID.trim().Split(".")[2]
+$oct3 = $ipID.trim().Split(".")[3]
 $id = "$($oct2)$($oct3)"
 
 
@@ -46,6 +45,10 @@ $firefoxDV = if ($firefox.publisher -eq "Mozilla") {Write-Output $firefox.Displa
 $chromeV = if ($chrome.displayname -eq "Google Chrome") {Write-Output $chrome.Version} else {Write-Output 'NULL'}
 $flashCV = if ($flash.PSChildName -eq "FlashPlayer") {Write-Output $flash.CurrentVersion} else {Write-Output 'NULL'}
 $javaV = if ($java.Vendor -eq "Oracle Corporation") {Write-Output $java | Select -Expand Version -Last 1} else {Write-Output 'NULL'}
+$FirstIP = if ([string]::IsNullOrEmpty($network.IPAddress[0])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[0]}
+$SecondIP = if ([string]::IsNullOrEmpty($network.IPAddress[1])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[1]}
+$FirstSub = if ([string]::IsNullOrEmpty($network.IPSubnet[0])) {Write-Output 'NULL'} else {Write-Output $network.IPSubnet[0]}
+$SecondSub = if ([string]::IsNullOrEmpty($network.IPSubnet[1])) {Write-Output 'NULL'} else {Write-Output $network.IPSubnet[1]}
 $WINS = if ([string]::IsNullOrEmpty($network.WINSPrimaryServer)) {Write-Output 'NULL'} else {Write-Output $network.WINSPrimaryServer}
 $WINSBackup = if ([string]::IsNullOrEmpty($network.WINSSecondaryServer)) {Write-Output 'NULL'} else {Write-Output $network.WINSSecondaryServer}
 $DNS = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[1])) {Write-Output 'NULL'} else {Write-Output $network.DNSServerSearchOrder[1]}
@@ -57,7 +60,7 @@ $DNSBackup = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[2])) {Wri
 Inventory.txt: has most system and network information. 
 Version.txt: has application and OS versions such as Firefox or Windows.
 '': represents a blank space to be manually filled in later#>
-Write-Output "$($id);$($hn);$($network.DHCPEnabled);$($network.IPAddress<#$ipv4add#>);$($network.IPSubnet);$($network.DefaultIPGateway);$($DNS);$($DNSBackup);$($WINS);$($WINSBackup);$($system.Domain);$($network.MACAddress);$($network.Description);$($netAdapter);'';'';'';'';'';$($user);'';$($system.Manufacturer);$($system.Model);'';'';$($bios.SerialNumber);'';$($memory)GB;$($system.SystemType);$($date);" >> Inventory\Inventory.txt
+Write-Output "$($id);$($hn);$($network.DHCPEnabled);$($FirstIP);$($FirstSub);$($SecondIP);$($SecondSub);$($network.DefaultIPGateway);$($DNS);$($DNSBackup);$($WINS);$($WINSBackup);$($system.Domain);$($network.MACAddress);$($network.Description);$($netAdapter.AdapterType);'';'';'';'';'';$($user);'';$($system.Manufacturer);$($system.Model);'';'';$($bios.SerialNumber);'';$($memory)GB;$($system.SystemType);$($date);" >> Inventory\Inventory.txt
 Write-Output "$($id);$($hn);$($os.Version);$($os.BuildNumber);$($bios.SMBIOSBIOSVersion);$($bios.Version);$($bios.Name);$($IE.Version);$($firefoxDV);$($chromeV);$($flashCV);$($javaV);$($PSVersionTable.PSVersion);$($date);" >> Inventory\Version.txt
 
 #Makes three text files with detailed information about computer.
