@@ -41,10 +41,10 @@ Else {
 }
 
 #NULL
-$firefoxDV = if ($firefox.publisher -eq "Mozilla") {Write-Output $firefox.DisplayVersion} else {Write-Output 'NULL'}
-$chromeV = if ($chrome.displayname -eq "Google Chrome") {Write-Output $chrome.Version} else {Write-Output 'NULL'}
-$flashCV = if ($flash.PSChildName -eq "FlashPlayer") {Write-Output $flash.CurrentVersion} else {Write-Output 'NULL'}
-$javaV = if ($java.Vendor -eq "Oracle Corporation") {Write-Output $java | Select -Expand Version -Last 1} else {Write-Output 'NULL'}
+$firefoxDV = if ([string]::IsNullOrEmpty($firefox.DisplayVersion)) {Write-Output 'NULL'} else {Write-Output $firefox.DisplayVersion}
+$chromeV = if ([string]::IsNullOrEmpty($chrome.Version)) {Write-Output 'NULL'} else {Write-Output $chrome.Version}
+$flashCV = if ([string]::IsNullOrEmpty($flash.CurrentVersion)) {Write-Output 'NULL'} else {Write-Output $flash.CurrentVersion}
+$javaV = if ([string]::IsNullOrEmpty($java)) {Write-Output 'NULL'} else {Write-Output $java | Select -Expand Version -Last 1}
 $FirstIP = if ([string]::IsNullOrEmpty($network.IPAddress[0])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[0]}
 $SecondIP = if ([string]::IsNullOrEmpty($network.IPAddress[1])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[1]}
 $FirstSub = if ([string]::IsNullOrEmpty($network.IPSubnet[0])) {Write-Output 'NULL'} else {Write-Output $network.IPSubnet[0]}
