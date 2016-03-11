@@ -16,7 +16,8 @@ $network = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -ComputerNam
 if ($network.Description -like "*Wireless*") {
         $netAdapter = "Wireless"
     } else {
-        $netAdapter = Get-WmiObject win32_networkadapter -filter "netconnectionstatus = 2" | select AdapterType | Select -first 1
+        $AdapterType = Get-WmiObject win32_networkadapter -filter "netconnectionstatus = 2" | select AdapterType | Select -first 1
+        $netAdapter =  $AdapterType.AdapterType
     }
 $ipconfig = ipconfig /all
 $route = route print
@@ -52,8 +53,8 @@ $FirstSub = if ([string]::IsNullOrEmpty($network.IPSubnet[0])) {Write-Output 'NU
 $SecondSub = if ([string]::IsNullOrEmpty($network.IPSubnet[1])) {Write-Output 'NULL'} else {Write-Output $network.IPSubnet[1]}
 $WINS = if ([string]::IsNullOrEmpty($network.WINSPrimaryServer)) {Write-Output 'NULL'} else {Write-Output $network.WINSPrimaryServer}
 $WINSBackup = if ([string]::IsNullOrEmpty($network.WINSSecondaryServer)) {Write-Output 'NULL'} else {Write-Output $network.WINSSecondaryServer}
-$DNS = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[1])) {Write-Output 'NULL'} else {Write-Output $network.DNSServerSearchOrder[1]}
-$DNSBackup = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[2])) {Write-Output 'NULL'} else {Write-Output $network.DNSServerSearchOrder[2..4]}
+$DNS = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[0])) {Write-Output 'NULL'} else {Write-Output $network.DNSServerSearchOrder[0]}
+$DNSBackup = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[1])) {Write-Output 'NULL'} else {Write-Output $network.DNSServerSearchOrder[1..4]}
 
 
 
@@ -61,7 +62,7 @@ $DNSBackup = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[2])) {Wri
 Inventory.csv: has most system and network information. 
 Version.csv: has application and OS versions such as Firefox or Windows.
 '': represents a blank space to be manually filled in later#>
-Write-Output "$($id),$($hn),$($network.DHCPEnabled[0]),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter.AdapterType),'','','','','',$($user),'',$($system.Manufacturer),$($system.Model),'','',$($bios.SerialNumber),'',$($memory)GB,$($system.SystemType),$($date)," >> Inventory\Inventory.csv
+Write-Output "$($id),$($hn),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter),'','','','','',$($user),'',$($system.Manufacturer),$($system.Model),'','',$($bios.SerialNumber),'',$($memory)GB,$($system.SystemType),$($date)," >> Inventory\Inventory.csv
 Write-Output "$($id),$($hn),$($os.Version),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.Version),$($firefoxDV),$($chromeV),$($flashCV),$($javaV),$($PSVersionTable.PSVersion),$($date)," >> Inventory\Version.csv
 
 #Makes three text files with detailed information about computer.
