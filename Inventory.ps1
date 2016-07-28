@@ -65,14 +65,14 @@
 Inventory.csv: has most system and network information. 
 Version.csv: has application and OS versions such as Firefox or Windows.
 '': represents a blank space to be manually filled in later#>
-    Write-Output "$($id),$($hn),$($date),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter)" >> .\Inventory\Network.csv
-    Write-Output "$($id),$($hn),$($date),$($system.Manufacturer),$($system.Model),$($bios.SerialNumber),$($memory)GB,$($system.SystemType),$($user)" >> .\Inventory\System.csv
-    Write-Output "$($id),$($hn),$($date),$($os.Version),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.Version),$($firefoxDV),$($chromeV),$($flashCV),$($javaV),$($PSVersionTable.PSVersion)" >> .\Inventory\Version.csv
+    Write-Output "$($id),$($ComputerName),$($date),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter)" >> .\Inventory\Network.csv
+    Write-Output "$($id),$($ComputerName),$($date),$($system.Manufacturer),$($system.Model),$($bios.SerialNumber),$($memory)GB,$($system.SystemType),$($user)" >> .\Inventory\System.csv
+    Write-Output "$($id),$($ComputerName),$($date),$($os.Version),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.Version),$($firefoxDV),$($chromeV),$($flashCV),$($javaV),$($PSVersionTable.PSVersion)" >> .\Inventory\Version.csv
 
 #Makes three text files with detailed information about computer.
-    Write-Output $ipconfig $netAdapter $route $date " " >> .\Inventory\details\$hn\detailedNetwork.txt
-    Write-Output $hn $user $system $bios $date " " >> .\Inventory\details\$hn\detailedSystem.txt
-    Write-Output $hn $os $bios $IE $firefox $chrome $flash $java $PSVersionTable $date " " >> .\Inventory\details\$hn\detailedVersion.txt
+    Write-Output $ipconfig $netAdapter $route $date " " >> .\Inventory\details\$ComputerName\detailedNetwork.txt
+    Write-Output $ComputerName $user $system $bios $date " " >> .\Inventory\details\$ComputerName\detailedSystem.txt
+    Write-Output $ComputerName $os $bios $IE $firefox $chrome $flash $java $PSVersionTable $date " " >> .\Inventory\details\$ComputerName\detailedVersion.txt
 
 #run for PowerShell version 2:
 
@@ -94,7 +94,7 @@ Version.csv: has application and OS versions such as Firefox or Windows.
 #Errors
     $LogFile = '.\Inventory\details\log.txt'
         Get-Date | Out-File $LogFile -Append
-        $hn | Out-File $LogFile -Append
+        $ComputerName | Out-File $LogFile -Append
         #$Error | Out-File $LogFile -Append
         $erFlash | Out-File $LogFile -Append
         $erJava | Out-File $LogFile -Append
