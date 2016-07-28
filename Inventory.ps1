@@ -1,7 +1,12 @@
 ﻿#Details Folder
-    $hn = hostname
-    $dirDetail = Test-Path ".\Inventory\details\$hn"
-    if ($dirDetail -eq "True") {Write-Output "Writing to: Inventory\details\$hn"} else {mkdir .\Inventory\details\$hn}
+    $ComputerName = hostname
+    $dirDetail = Test-Path ".\Inventory\details\$ComputerName"
+        if ($dirDetail -eq "True") {
+            Write-Output "Writing to: Inventory\details\$ComputerName"
+        } 
+        else {
+            mkdir .\Inventory\details\$ComputerName
+        }
 
 #ID
     $ipID = ipconfig | Where-Object {$_ -match "IPv4 Address"} | ForEach-Object{$_.Split(":")[1]}
