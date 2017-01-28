@@ -1,16 +1,39 @@
-﻿#Details Folder
-    $ComputerName = hostname
-    $dirDetail = Test-Path ".\Inventory\details\$ComputerName"
-        if ($dirDetail -eq "True") {
-            Write-Output "Writing to: Inventory\details\$ComputerName"
+    $System = Get-WmiObject Win32_ComputerSystem
+    $SoftwareLicensing = Get-WmiObject SoftwareLicensingService
+
+
+#Date
+    $Date =  Get-Date -format s
+    $DateRegular = Get-Date
+    $DateReadable = Get-Date -Format g
+    $Timestamp = Get-Date -Format o | foreach {$_ -replace ":", "."}
+
+#Destination Folder
+    $DestinationFolder = '.\Library\Inventory'
+    $DestinationFolderPath = Test-Path $DestinationFolder
+        If ($DestinationFolderPath -eq 'True') 
+        {
+            Write-Verbose "Using existing folder: $($DestinationFolder)" -Verbose
         } 
-        else {
-            mkdir .\Inventory\details\$ComputerName
+        Else 
+        {
+            mkdir "$($DestinationFolder)"
+        }
+
+#Details Folder
+    $ComputerName = hostname
+    $dirDetail = Test-Path "$DestinationFolder\details\$ComputerName"
+        If ($dirDetail -eq "True") 
+        {
+            Write-Verbose "Writing to: $DestinationFolder\details\$ComputerName" -Verbose
+        } 
+        Else 
+        {
+            mkdir $DestinationFolder\details\$ComputerName
         }
 
 #ID
     $ipID = ipconfig | Where-Object {$_ -match "IPv4 Address"} | ForEach-Object{$_.Split(":")[1]}
-
     $oct2 = $ipID.trim().Split(".")[2]
     $oct3 = $ipID.trim().Split(".")[3]
     $id = "$($oct2)$($oct3)"
