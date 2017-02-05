@@ -39,6 +39,131 @@
     $id = "$($oct2)$($oct3)"
 
 
+#Flash
+    $Flash =  Get-ItemProperty 'HKLM:\SOFTWARE\Macromedia\FlashPlayer\'
+    $Flash = if ([string]::IsNullOrEmpty($Flash.CurrentVersion))
+             {
+                 Write-Output 'NULL'
+             }
+             else 
+             {
+                 Write-Output $Flash.CurrentVersion | foreach {$_ -replace ",", "."}     #Replaces commas “,” with periods “.” for consistency.
+             }
+        Write-Verbose "Old Flash: $($Flash)" -Verbose
+
+    $FlashNPAPIKey = 'HKLM:\SOFTWARE\Macromedia\FlashPlayerPlugin'    #NPAPI Flash registry key
+    $FlashNPAPITest = Test-Path $FlashNPAPIKey    #Check if it is instlled
+    If ($FlashNPAPITest -eq "True")
+        {
+            $FlashNPAPI = Get-ItemProperty $FlashNPAPIKey
+            #Write-Output $FlashNPAPI
+            Write-Verbose "Flash NPAPI: $($FlashNPAPI.Version)" -Verbose
+        }
+        Else
+        {
+            $FlashNPAPI = Write-Output 'NULL'
+            Write-Verbose "Flash NPAPI: NULL" -Verbose
+        }
+
+
+    $FlashPPAPIKey = 'HKLM:\SOFTWARE\Macromedia\FlashPlayerPepper'
+    $FlashPPAPITest = Test-Path $FlashPPAPIKey
+    If ($FlashPPAPITest -eq "True")
+        {
+            $FlashPPAPI = Get-ItemProperty $FlashPPAPIKey
+            #Write-Output $FlashPPAPI
+            Write-Verbose  "Flash PPAPI (Pepper): $($FlashPPAPI.Version)" -Verbose
+        }
+         Else
+        {
+            $FlashPPAPI = Write-Output 'NULL'
+            Write-Verbose "Flash PPAPI (Pepper): NULL" -Verbose
+        }
+
+
+    $FlashActiveXKey = 'HKLM:\SOFTWARE\Macromedia\FlashPlayerActiveX'
+    $FlashActiveXTest = Test-Path $FlashNPAPIKey
+    If($FlashActiveXTest -eq "True")
+        {
+            $FlashActiveX = Get-ItemProperty $FlashActiveXKey
+            #Write-Output $FlashActiveX
+            Write-Verbose "Flash ActiveX: $($FlashActiveX.Version)" -Verbose           
+        }
+        Else
+        {
+            $FlashActiveX = Write-Output 'NULL'
+            Write-Verbose "Flash ActiveX: NULL" -Verbose
+        }
+        
+
+
+    #Get newest version number
+    $NewestFlashFile = Get-ItemProperty .\NewestFlash.txt    #Find the date the file was last modified
+    $FlashFileDiffernce = $NewestFlashFile.LastWriteTime-$DateRegular    #Subtract the file date from the current date/time.
+    If ($FlashFileDiffernce.Hour -gt 24 -and $PSVersionTable.PSVersion.Major -gt 2)    #Invoke-WebRequest requires PowerShell version 3+.
+    {
+        #Is Flash updated? 
+        $adobecom = Invoke-WebRequest "https://get.adobe.com/flashplayer/"                                                         #Check Adobe's website for the latest version number.
+        $NewestFlash = $adobecom.AllElements | Where-Object {$_.InnerHtml -like "version *"} | Select-Object innerHTML -First 1    #Select the version number from the webpage.
+            Write-Output $NewestFlash.innerHTML > .\NewestFlash.txt                                                                #Write it to a file.
+            (Get-Content .\NewestFlash.txt) -replace 'Version ','' | Foreach {$_.TrimEnd()} | Set-Content .\NewestFlash.txt        #Cleanup the output and make it ready to be read.
+    }
+    Else 
+    {
+        #
+        Write-Verbose "Reading plug-in version from file..." -Verbose
+    }
+    #run for PowerShell version 2:
+
+
+        $NewestFlash = Get-Content .\NewestFlash.txt
+        If ($FlashNPAPI.version -NotLike $NewestFlash) 
+        {
+            Write-Error -ErrorVariable erFlash -Message "Flash needs to be updated: $($FlashNPAPI.version) not $NewestFlash"
+
+                #Options menu
+                    $title = "Update Flash"
+                    $message = "Do you want to update flash to $($NewestFlash)?"
+
+                    $yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes", `
+                        "Downloads and installs the latest version of Flash."
+
+                    $no = New-Object System.Management.Automation.Host.ChoiceDescription "&No", `
+                        "Skips updating Flash."
+
+                    $options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no)
+
+		        #Set as '$result' to prompt user. 
+                #Set as '1' to skip.
+                    $result = 1
+                    #$result = $host.ui.PromptForChoice($title, $message, $options, 1)
+
+                    switch ($result)
+                    {
+                        0 
+                        {
+			                $FlashInstallers = Get-ChildItem ".\flash\flashplayer*install.exe"	
+                            foreach ($Installer in $FlashInstallers) 
+                            {
+                                Copy-Item $Installer $env:TEMP
+                                Start-Process $Installer -Wait
+                            }
+                            #clean up
+                            Remove-Item "$env:TEMP\flashplayer*install.exe"
+                               
+                        }
+                        1 
+                        {
+                            "Skipping..."
+                        }
+                    }
+            } 
+        Else 
+        {
+            Write-Verbose "Flash is up-to-date: $($FlashNPAPI.Version)" -Verbose
+        }
+
+
 #Variables
     $network = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -ComputerName 127.0.0.1 -Filter "IpEnabled = TRUE"
     if ($network.Description -like "*Wireless*") {
