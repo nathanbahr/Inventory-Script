@@ -165,7 +165,100 @@
             Write-Verbose "Flash is up-to-date: $($FlashNPAPI.Version)" -Verbose
         }
 
+#Java
+    #OLDer $Java = Get-WmiObject Win32_Product -Filter "Name like 'Java % Update %'" | where {$_.Name -notlike '* Development Kit *'} | Sort-Object Version
+    #OLD $Java = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{26A24AE4-039D-4CA4-87B4-2F64180111F0}'    #may need to make the key a variable with *
+    
+    IF ($system.SystemType -eq "X86-based PC")   
+    {
+        $JavaKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{26A24AE4-039D-4CA4-87B4-2F*}'    #Use this key if on a 32-bit system
+    }
+    Else
+    {
+        $JavaKey = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{26A24AE4-039D-4CA4-87B4-2F*}'    #Use this key if on a 64-bit system    
+    }
+    $JavaTest = Test-Path $JavaKey    #test to see if Java is installed
+    If ($JavaTest -eq "True")    #if it is...
+    {
+        $Java = Get-ItemProperty $JavaKey | where {$_.DisplayName -like 'Java *'}    #Get the properties of the correct registry key
+        Write-Verbose "Java Runtime Environment (JRE): $($Java.DisplayVersion)" -Verbose    #Display the version of JRE to the console
+    }
+    Else
+    {
+        $Java = Write-Output 'NULL'
+        Write-Verbose "Java Runtime Environment (JRE): NULL or incorect '*bit' version installed" -Verbose
+    }
 
+        $NewestJavaFile = Get-ItemProperty .\NewestJava.txt
+        $JavaFileDifference = $NewestFlashFile.LastWriteTime-$DateRegular
+        If ($javahFileDiffernce.Hour -gt 24 -and $PSVersionTable.PSVersion.Major -gt 2)
+        {
+            #Is Java updated?
+
+$javacom = Invoke-WebRequest "http://www.java.com/en/download/"
+            $NewestJava = $javacom.AllElements | Where-Object {$_.InnerHtml -like "Version * Update *"} | Select-Object innerHTML -First 1
+                Write-Output $NewestJava.innerHTML > .\NewestJava.txt
+                
+                (Get-Content .\NewestJava.txt) -replace 'Version','Java' | Foreach {$_.TrimEnd()} | Set-Content .\NewestJava.txt    #Replaces the word 'Version' that is pulled from the web page to 'Java' to match what is in WMI.
+        }
+        Else
+        {
+            Write-Verbose "Reading plug-in version from file..." -Verbose
+        }
+
+
+      #removes 64-bit from the Java name so just the version is compared.
+        $JavaName = $Java.DisplayName -replace "\(64-bit\)","" | Foreach {$_.TrimEnd()}
+        $NewestJava = (Get-Content .\NewestJava.txt)
+        
+        If ($JavaName -NotLike $NewestJava) 
+        {
+            Write-Error -Message "Java needs to be updated: $JavaName not $NewestJava"
+
+            #Options menu
+                $title = "Update Java"
+                $message = "Do you want to update Java to $($NewestJava + "?")"
+
+                $yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes", `
+                    "Downloads and installs the latest version of Java."
+
+                $no = New-Object System.Management.Automation.Host.ChoiceDescription "&No", `
+                    "Skips updating Java."
+
+                $options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no)
+	
+	        #set as '$result to prompt user. Set as '1' to skip.
+                $result = 1 
+                #$result = $host.ui.PromptForChoice($title, $message, $options, 1)                     
+                 
+                switch ($result)
+                {
+                    0 
+                    {   
+                        $JavaIntaller = '.\java\'                          
+                        if ($system.SystemType -eq "x64-based PC") 
+                        {
+                            Start-Process .\java\jxpiinstall.exe -Wait
+                        }
+                        else 
+                        {
+                            Start-Process .\java\jxpiinstall.exe -Wait
+                        }
+                           
+                    }
+                    1 
+                    {
+                        Write-Verbose "Skipping..."
+                    }
+                } 
+                
+            } 
+        else 
+        {
+            Write-Verbose "Java is up-to-date: $($Java.DisplayName)" -Verbose
+        }
+	
+	
 #Variables
     $network = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -ComputerName 127.0.0.1 -Filter "IpEnabled = TRUE"
     if ($network.Description -like "*Wireless*") {
