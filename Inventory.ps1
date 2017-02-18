@@ -322,7 +322,55 @@ $javacom = Invoke-WebRequest "http://www.java.com/en/download/"
 #Internet Explorer
     $IE = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Internet Explorer'
 
-	
+#Adobe Reader
+    #$Reader = Get-WmiObject Win32_Product -Filter "Name like '% Reader %'"
+    IF ($system.SystemType -eq "X86-based PC")
+    {
+        $ReaderKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{AC76BA86-7AD7-1*}'
+    }
+    Else
+    {
+        $ReaderKey = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{AC76BA86-7AD7*}'
+    }
+    $ReaderTest = Test-Path $ReaderKey
+        If ($ReaderTest -eq "True") 
+        {
+            $Reader = Get-ItemProperty $ReaderKey
+            Write-Verbose "Adobe Reader: $($Reader.DisplayVersion)" -Verbose
+        } 
+        Else
+        {
+            $Reader = Write-Output 'NULL'
+            Write-Verbose "Adobe Reader: NULL" -Verbose
+        }
+
+#Google Drive
+    $GoogleDrive = Get-Process *googledrive*
+    If ([string]::IsNullOrEmpty($GoogleDrive)) 
+    {
+        $GoogleDrive = Write-Output "Stopped"
+        Write-Verbose "Googele Drive: Stopped" -Verbose
+    }
+    Else
+    {
+        $GoogleDrive = Write-Output "Running"
+        Write-Verbose "Googele Drive: Running" -Verbose
+    }
+
+#McAfee
+    $McAfeeKey = 'HKLM:\SOFTWARE\Wow6432Node\McAfee\Agent\'
+    $McAfeeTest = Test-Path $McAfeeKey
+        If ($McAfeetest -eq 'True') 
+        {
+            $McAfeeAgent = (Get-ItemProperty $McAfeeKey).AgentVersion
+            Write-Verbose "McAfee Agent: $($McAfeeAgent)" -Verbose
+        }
+        Else 
+        {
+            $McAfeeAgent = 'NULL'
+            Write-Verbose "McAfee Agent: NULL" -Verbose
+        }
+
 #Variables
     $network = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -ComputerName 127.0.0.1 -Filter "IpEnabled = TRUE"
     if ($network.Description -like "*Wireless*") {
