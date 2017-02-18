@@ -1,4 +1,4 @@
-    $System = Get-WmiObject Win32_ComputerSystem
+﻿    $System = Get-WmiObject Win32_ComputerSystem
     $SoftwareLicensing = Get-WmiObject SoftwareLicensingService
 
 
@@ -41,7 +41,11 @@
     $id = "$($oct2)$($oct3)"
 
 
+
+
 #Flash
+   #Pulls the currently installed version of Flash from the registry.
+    #http://www.adobe.com/software/flash/about/?UPCDeviceType=Homepage&UPCLocale=en_US&UPCInstallLocale=en_US&
     $Flash =  Get-ItemProperty 'HKLM:\SOFTWARE\Macromedia\FlashPlayer\'
     $Flash = if ([string]::IsNullOrEmpty($Flash.CurrentVersion))
              {
@@ -165,6 +169,7 @@
             Write-Verbose "Flash is up-to-date: $($FlashNPAPI.Version)" -Verbose
         }
 
+
 #Java
     #OLDer $Java = Get-WmiObject Win32_Product -Filter "Name like 'Java % Update %'" | where {$_.Name -notlike '* Development Kit *'} | Sort-Object Version
     #OLD $Java = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{26A24AE4-039D-4CA4-87B4-2F64180111F0}'    #may need to make the key a variable with *
@@ -194,8 +199,7 @@
         If ($javahFileDiffernce.Hour -gt 24 -and $PSVersionTable.PSVersion.Major -gt 2)
         {
             #Is Java updated?
-
-$javacom = Invoke-WebRequest "http://www.java.com/en/download/"
+            $javacom = Invoke-WebRequest "http://www.java.com/en/download/"
             $NewestJava = $javacom.AllElements | Where-Object {$_.InnerHtml -like "Version * Update *"} | Select-Object innerHTML -First 1
                 Write-Output $NewestJava.innerHTML > .\NewestJava.txt
                 
@@ -205,7 +209,6 @@ $javacom = Invoke-WebRequest "http://www.java.com/en/download/"
         {
             Write-Verbose "Reading plug-in version from file..." -Verbose
         }
-
 
       #removes 64-bit from the Java name so just the version is compared.
         $JavaName = $Java.DisplayName -replace "\(64-bit\)","" | Foreach {$_.TrimEnd()}
@@ -278,7 +281,8 @@ $javacom = Invoke-WebRequest "http://www.java.com/en/download/"
             $Chrome = Write-Output 'NULL'
             Write-Verbose "Chrome: NULL" -Verbose
         }
-	
+
+
 #Firefox
     IF ($system.SystemType -eq "X86-based PC") 
     {
@@ -371,27 +375,20 @@ $javacom = Invoke-WebRequest "http://www.java.com/en/download/"
             Write-Verbose "McAfee Agent: NULL" -Verbose
         }
 
-#Variables
+#Network
     $network = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -ComputerName 127.0.0.1 -Filter "IpEnabled = TRUE"
-    if ($network.Description -like "*Wireless*") {
+        If ($network.Description -like "*Wireless*")
+        {
             $netAdapter = "Wireless"
-        } else {
+        } 
+        Else 
+        {
             $AdapterType = Get-WmiObject win32_networkadapter -filter "netconnectionstatus = 2" | select AdapterType | Select -first 1
             $netAdapter =  $AdapterType.AdapterType
         }
     $ipconfig = ipconfig /all
     $route = route print
-    $system = Get-WmiObject -Class Win32_computerSystem
-    $memory = Get-WmiObject Win32_computersystem | foreach-object {[math]::round($_.totalPhysicalMemory / 1GB,2)} <#displays the amount of system memory rounded to the hundredths place#>
-    $bios = Get-WmiObject Win32_bios
-    $user = $env:username
-    $date =  Get-Date -format s
-    $os = Get-WmiObject Win32_operatingSystem
 
-
-
-
-#NULL
     $FirstIP = if ([string]::IsNullOrEmpty($network.IPAddress[0])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[0]}
     $SecondIP = if ([string]::IsNullOrEmpty($network.IPAddress[1])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[1]}
     $FirstSub = if ([string]::IsNullOrEmpty($network.IPSubnet[0])) {Write-Output 'NULL'} else {Write-Output $network.IPSubnet[0]}
@@ -401,22 +398,195 @@ $javacom = Invoke-WebRequest "http://www.java.com/en/download/"
     $DNS = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[0])) {Write-Output 'NULL'} else {Write-Output $network.DNSServerSearchOrder[0]}
     $DNSBackup = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[1])) {Write-Output 'NULL'} else {Write-Output $network.DNSServerSearchOrder[1..4]}
 
-<#Makes two txt files. 
-Inventory.csv: has most system and network information. 
-Version.csv: has application and OS versions such as Firefox or Windows.
-'': represents a blank space to be manually filled in later#>
-    Write-Output "$($id),$($ComputerName),$($date),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter)" >> .\Inventory\Network.csv
-    Write-Output "$($id),$($ComputerName),$($date),$($system.Manufacturer),$($system.Model),$($bios.SerialNumber),$($memory)GB,$($system.SystemType),$($user)" >> .\Inventory\System.csv
-    Write-Output "$($id),$($ComputerName),$($date),$($os.Version),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.Version),$($firefoxDV),$($chromeV),$($flashCV),$($javaV),$($PSVersionTable.PSVersion)" >> .\Inventory\Version.csv
+#TeamViewer
+    $TeamViewerKey = 'HKLM:\SOFTWARE\WOW6432Node\TeamViewer\Version9'
+    $TeamViewerTest = Test-Path $TeamViewerKey
+        If ($TeamViewerTest -eq "True") 
+        {
+            $TeamViewer = gp $TeamViewerKey
+            Write-Verbose "TeamViewer: $($TeamViewer.ClientID)" -Verbose
+        } 
+        Else
+        {
+            Write-Output "TeamViewer: NULL"
+        }      
+
+#System
+    $os = Get-WmiObject Win32_operatingSystem
+        Write-Output "Windows: $($SoftwareLicensing.Version)"
+
+    $CPU = Get-WmiObject Win32_Processor     #Gets information on the CPU
+        Write-Output "CPU: $($CPU.Name)"
+
+        $MaxMHz = ((Get-WmiObject Win32_Processor).MaxClockSpeed)    #Gets the maximum clock speed in MHz.
+        $MaxGHz = $CPU | ForEach-Object {[math]::Round($_.MaxClockSpeed / 10)}    #Rounds the clock speed to go from MHz to GHz.
+        $MaxGHz = "$($MaxGHz / 100) GHz"    #Adds the decimal place and GHz label.
+        
+
+    $memory = Get-WmiObject Win32_computersystem | foreach-object {[math]::round($_.totalPhysicalMemory / 1GB)}   #Displays the amount of system memory rounded to the nearest gigabyte.
+        Write-Output "RAM: $($memory) GB"
+       
+        $FreeMemory = [math]::Round($os.FreePhysicalMemory/1mb,2)
+        $FreeMemoryPercent = [math]::Round(($os.FreePhysicalMemory/$os.TotalVisibleMemorySize)*100,2)
+
+    $bios = Get-WmiObject Win32_bios
+    $user = $env:username
+    $NetUser = net user
+            #$firefox = Write-Output $FirefoxKey.DisplayVersion
+    $Firewall = netsh advfirewall show allprofiles
+    $Desktop = [Environment]::GetFolderPath("Desktop")
+    If ($PSVersionTable.PSVersion.Major -gt 4) {
+        $Printer = Get-Printer
+        $PrinterDriver = Get-PrinterDriver
+    }
+    $ProductKey = $SoftwareLicensing.KeyManagementServiceProductKeyID
+        Write-Verbose $ProductKey -Verbose
+
+#Storage
+    #$Volume = Get-Volume    #Requires Windows 8 or newer. Using "Get-PSDrive" instead.
+    $CDrive = Get-PSDrive -Name C
+        $CDriveUsed = $CDrive | ForEach-Object {[math]::Round($_.used / 1GB)}
+        $CDriveFree = $CDrive | ForEach-Object {[math]::Round($_.free / 1GB)}
+        $CDriveCapacity = $CDrive.Used+$CDrive.Free
+            $CDriveCapacity = ForEach-Object {[math]::Round($CDriveCapacity / 1GB)}
+
+        $CDrivePercentUsed = ($CDriveUsed/$CDriveCapacity).ToString("P")
+        
+        <#Get-Volume -DriveLetter C | select @{L="PercentUsed";E={($_.sizeremaining/$_.size).ToString("P")}}#>
+        <#https://blogs.technet.microsoft.com/heyscriptingguy/2014/10/11/weekend-scripter-use-powershell-to-calculate-and-display-percentages/#>
+
+#Video Driver
+    $VidDriver = Get-WmiObject win32_VideoController
+
+        If ([string]::IsNullOrEmpty($($VidDriver | Where {$_.Name -Like "*AMD*"})))    #Sees if an AMD GPU is instlled
+        {
+            $AMDVidDriver = 'NULL'    #If not, mark as empty
+        }
+        Else
+        {
+            $AMDVidDriver = $VidDriver | Where {$_.Name -Like "*AMD*"}
+            $AMDVidDriverVersion = $AMDVidDriver | Select DriverVersion -First 1
+            $AMDVidDriverName = $AMDVidDriver | Select Name -First 1
+            Write-Output "$($AMDVidDriverName.Name)"
+            Write-Verbose "AMD Driver: $($AMDVidDriverVersion.DriverVersion)" -Verbose
+        }
+
+
+        
+        If ([string]::IsNullOrEmpty($($VidDriver | Where {$_.Name -Like "*Intel*"})))    #Sees if an Intel GPU is instlled
+        {
+            $IntelVidDriver = 'NULL'
+        } 
+        Else 
+        {
+            $IntelVidDriver = $VidDriver | Where {$_.Name -Like "*Intel*"}
+            $IntelVidDriverVersion = $IntelVidDriver | Select DriverVersion -First 1
+            $IntelVidDriverName = $IntelVidDriver | Select Name -First 1
+            Write-Output "$($IntelVidDriverName.Name)"    #GPU model name
+            Write-Verbose "Intel Driver: $($IntelVidDriverVersion.DriverVersion)" -Verbose    #GPU driver version
+
+        }
+            
+        
+        If ([string]::IsNullOrEmpty($($VidDriver | Where {$_.Name -Like "*NVIDIA*"})))    #Sees if a NVIDIA GPU is instlled
+        {
+            $NVIDIAVidDriver = 'NULL'
+        }
+        Else
+        {
+            $NVIDIAVidDriver = $VidDriver | Where {$_.Name -Like "*NVIDIA*"}
+            $NVIDIAVidDriverVersion = $NVIDIAVidDriver | Select DriverVersion -First 1
+            $NVIDIAVidDriverName = $NVIDIAVidDriver | Select Name -First 1
+            Write-Output "$($NVIDIAVidDriverName.Name)"
+            Write-Verbose "NVIDIA Driver: $($NVIDIAVidDriverVersion.DriverVersion)" -Verbose
+            
+        }
+
+
+#Account Permissions
+    $AdminUsers = net localgroup administrators
+    $AdminPrivileges = $AdminUsers -ccontains $env:USERNAME    
+        If ($AdminPrivileges -eq "True") 
+        {
+            Write-Error -Message "Current user has administrator privileges."
+        } 
+        Else 
+        {
+            Write-Output "Current user does not have administrator privileges."
+        }
+
+
+    $TestInventoryFull = Test-Path $DestinationFolder\InventoryFull.csv    #Creates the files used to store the retrieved data if they do not exist.
+        if ($TestInventoryFull -like "False")
+        {
+            #Makes the CSV file.
+            Write-Output 'ID,Hostname,Timestamp,Serial Number,Manufacturer,Model Number,DHCP,IP Address,Subnet Mask,Second IP,Second Subnet,Default Gateway,Primary DNS,Backup DNS,Primary WINS,Backup WINS,Domain,MAC Address,Network Adapter,Adapter Type,CPU Name,Physical Cores,Logical Cores,Max Frequency,Memory,Free Memory,Pct Used,System Type,Username,Admin Privileges,TeamViewer,AMD GPU,NVIDIA GPU,Intel GPU,Googele Drive,Capacity,Used,Free,Percent Used,Windows Key,OS Name,OS Number,OS Build,SMBIOS,BIOS Version,BIOS Date/Name,Internet Explorer,Firefox,Chrome,Flash,Flash NPAPI,Flash PPAPI,Java,Adobe Reader,PowerShell,AMD Driver,NVIDIA Driver,Intel Driver,McAfee,IP1,IP2,IP3,IP4' >> $DestinationFolder\InventoryFull.csv
+        }
+
+
+
+<#
+    $TestNetwork = Test-Path $DestinationFolder\Network.csv
+        if ($TestNetwork -like "False") 
+        {
+            Write-Output 'ID,Hostname,Date,DHC,IP Address,Subnet Mask,Second IP,Second Subnet,Default Gateway,Primary DNS,Backup DNS,Primary WINS,Backup WINS,Domain,MAC Address,Network Adapter,Adapter Type' >> $DestinationFolder\Network.csv
+        }
+    
+    $TestSystem = Test-Path $DestinationFolder\System.csv
+        if ($TestSystem -like 'False') 
+        {
+            Write-Output 'ID,Hostname,Date,Manufacturer,Model Name,Serial Number,CPU Name,Physical Cores,Logical Cores,Max Frequency,Memory,System Type,Username,Admin Privileges,TeamViewer,AMD GPU,NVIDIA GPU,Intel GPU,Googele Drive,Capacity,Used,Free' >> $DestinationFolder\System.csv
+        }
+
+    $TestVersion = Test-Path $DestinationFolder\Version.csv
+        if ($TestVersion -like 'False') 
+        {
+            Write-Output 'ID,Hostname,Date,OS Name,OS Number,OS Build,SMBIOS,BIOS Version,BIOS Date/Name,Internet Explorer,Firefox,Chrome,Flash,Java,Adobe Reader,PowerShell,AMD Driver,NVIDIA Driver,Intel Driver,McAfee' >> $DestinationFolder\Version.csv
+        }
+#>
+
+    <#Full#> Write-Output "$($id),$($ComputerName),$($date),$($bios.SerialNumber),$($system.Manufacturer),$($system.Model),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter),$($CPU.Name),$($CPU.NumberOfCores),$($CPU.NumberOfLogicalProcessors),$($MaxGHz),$($memory) GB,$($FreeMemory) GB,$($FreeMemoryPercent) %,$($system.SystemType),$($user),$($AdminPrivileges),$($TeamViewer.ClientID),$($AMDVidDriverName.Name),$($NVIDIAVidDriverName.Name),$($IntelVidDriverName.Name),$($GoogleDrive),$($CDriveCapacity) GB,$($CDriveUsed) GB,$($CDriveFree) GB,$($CDrivePercentUsed),$($ProductKey),$($os.Caption -replace 'Microsoft ',''),$($SoftwareLicensing.version<#$os.Version#>),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.svcVersion),$($FirefoxVersion),$($Chrome.Version),$($Flash),$($FlashNPAPI.Version),$($FlashPPAPI.Version),$($Java.DisplayVersion),$($Reader.DisplayVersion),$($PSVersionTable.PSVersion),$($AMDVidDriverVersion.DriverVersion),$($NVIDIAVidDriverVersion.DriverVersion),$($IntelVidDriverVersion.DriverVersion),$($McAfeeAgent),$($oct0),$($oct1),$($oct2),$($oct3)" >> $DestinationFolder\InventoryFull.csv
+
+
+  #  <#Network#> Write-Output "$($id),$($ComputerName),$($date),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter)" >> $DestinationFolder\Network.csv
+  #  <#System#> Write-Output "$($id),$($ComputerName),$($date),$($system.Manufacturer),$($system.Model),$($bios.SerialNumber),$($CPU.Name),$($CPU.NumberOfCores),$($CPU.NumberOfLogicalProcessors),$($MaxGHz),$($memory) GB,$($FreeMemory) GB,$($FreeMemoryPercent) %,$($system.SystemType),$($user),$($AdminPrivileges),$($TeamViewer.ClientID),$($AMDVidDriverName.Name),$($NVIDIAVidDriverName.Name),$($IntelVidDriverName.Name),$($GoogleDrive),$($CDriveCapacity) GB,$($CDriveUsed) GB,$($CDriveFree) GB,$($CDrivePercentUsed),$($ProductKey)" >> $DestinationFolder\System.csv
+  #  <#Version#> Write-Output "$($id),$($ComputerName),$($date),$($os.Caption -replace 'Microsoft ',''),$($SoftwareLicensing.version<#$os.Version#>),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.svcVersion),$($FirefoxVersion),$($Chrome.Version),$($Flash),$($FlashNPAPI.Version),$($FlashPPAPI.Version),$($Java.DisplayVersion),$($Reader.DisplayVersion),$($PSVersionTable.PSVersion),$($AMDVidDriverVersion.DriverVersion),$($NVIDIAVidDriverVersion.DriverVersion),$($IntelVidDriverVersion.DriverVersion),$($McAfeeAgent)" >> $DestinationFolder\Version.csv
+
+    <#Library#> If ($DestinationFolder -like ".\Library\*") {
+                    Write-Output "$($ComputerName),$($date),$($FirstIP),<#Description#>,$($user),$($AdminPrivileges),$($system.Model),$($bios.SerialNumber),<#Patch Port#>,<#Extension/Switch>,<#Location#>," >> $DestinationFolder\Library.csv
+                }
+    <#IronRidge#> If ($DestinationFolder -like ".\IronRidge\*") {
+                        $TestVersion = Test-Path $DestinationFolder\IronRidge.csv
+                            if ($TestVersion -like 'False') {
+                                Write-Output 'Timestamp,Hostname,Date,User Name,Type,Model Name,Serial Number,OS,Memory,TeamViewer,Google Drive' >> $DestinationFolder\IronRidge.csv
+                            }
+                        Write-Output ",,$($date),$($user),$($DateReadable),$($ComputerName),Laptop,$($system.Model),$($bios.SerialNumber),$($os.Caption -replace 'Microsoft ',''),$($memory) GB,$($TeamViewer.ClientID),$($GoogleDrive)" >> $DestinationFolder\IronRidge.csv
+                     }
 
 #Makes three text files with detailed information about computer.
-    Write-Output $ipconfig $netAdapter $route $date " " >> .\Inventory\details\$ComputerName\detailedNetwork.txt
-    Write-Output $ComputerName $user $system $bios $date " " >> .\Inventory\details\$ComputerName\detailedSystem.txt
-    Write-Output $ComputerName $os $bios $IE $firefox $chrome $flash $java $PSVersionTable $date " " >> .\Inventory\details\$ComputerName\detailedVersion.txt
+    Write-Output $ipconfig $netAdapter $route $Firewall $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedNetwork.txt
+    Write-Output $ComputerName $user $system $CPU $bios $NetUser $AdminUsers $VidDriver <#$Printer#> <#$PrinterDriver#> <#'Get-Volume' $Volume#> $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
+    Get-WmiObject SoftwareLicensingService >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
+        if ($os.Version -gt "6.1.7601")
+        {
+            Get-Volume >> $DestinationFolder\details\$ComputerName\$Timestamp-Drives.txt
+            Get-Printer >> $DestinationFolder\details\$ComputerName\$Timestamp-Printers.txt
+        }
+    Write-Output $ComputerName $os $bios $IE $firefox $Chrome $Flash $Java $PSVersionTable $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedVersion.txt   
+	    Get-childitem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\' >> $DestinationFolder\details\$ComputerName\$Timestamp-applications.txt    #lists all installed 32-bit programs in a text file
+	    if ($System.SystemType -eq "X64-based PC")    #only for 64-bit computers
+        {
+            Get-childitem 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' >> $DestinationFolder\details\$ComputerName\$Timestamp-applications64.txt    #lists all installed 64-bit programs in a text file
+        }
 
+# remove quotes
+    foreach ($file in Get-ChildItem $DestinationFolder\*.csv)    #Selects the files
+    {
+        (Get-Content $file) -replace '"','' | Set-Content $file    #Replaces quotes with a blank space
+    }
 
 #Errors
-    $LogFile = '.\Inventory\details\log.txt'
+    $LogFile = "$DestinationFolder\details\log.txt"
         Get-Date | Out-File $LogFile -Append
         $ComputerName | Out-File $LogFile -Append
         #$Error | Out-File $LogFile -Append
