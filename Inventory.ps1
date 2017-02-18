@@ -34,6 +34,8 @@
 
 #ID
     $ipID = ipconfig | Where-Object {$_ -match "IPv4 Address"} | ForEach-Object{$_.Split(":")[1]}
+    $oct0 = $ipID.trim().Split(".")[0]
+    $oct1 = $ipID.trim().Split(".")[1]
     $oct2 = $ipID.trim().Split(".")[2]
     $oct3 = $ipID.trim().Split(".")[3]
     $id = "$($oct2)$($oct3)"
