@@ -257,7 +257,71 @@ $javacom = Invoke-WebRequest "http://www.java.com/en/download/"
         {
             Write-Verbose "Java is up-to-date: $($Java.DisplayName)" -Verbose
         }
+
+#Chrome
+    IF ($system.SystemType -eq "X86-based PC") 
+    {
+	    $ChromeKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome'
+    }
+    Else 
+    {
+        $ChromeKey = 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome\'
+    }      
+    $ChromeTest = Test-Path $ChromeKey
+        If ($ChromeTest -eq "True")
+        {
+            $Chrome = Get-ItemProperty $ChromeKey
+            Write-Verbose "Chrome: $($Chrome.Version)" -Verbose         
+        } 
+        Else 
+        {
+            $Chrome = Write-Output 'NULL'
+            Write-Verbose "Chrome: NULL" -Verbose
+        }
 	
+#Firefox
+    IF ($system.SystemType -eq "X86-based PC") 
+    {
+        $FirefoxKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Mozilla Firefox*'
+    }
+    Else 
+    {
+        $FirefoxKey = 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Mozilla Firefox*'
+    }
+
+    $FirefoxTest = Test-Path $FirefoxKey
+    $Firefox = If ($FirefoxTest -eq "True") 
+        {
+            Get-ItemProperty $FirefoxKey
+        } 
+        else 
+        {
+            Write-Output 'NULL'
+        }
+
+            $FirefoxVersion = if ([string]::IsNullOrEmpty($Firefox.DisplayVersion)) 
+                {
+                    Write-Output 'NULL'
+                } 
+                else 
+                {
+                    Write-Output $Firefox.DisplayVersion | Foreach {$_.TrimEnd()}
+                }
+
+                If ($FirefoxVersion -NotLike "51.0.1") 
+                {
+                    $FirefoxPath = $firefox.DisplayIcon -replace ",0",""    #Sets the path to Firefox from the registry.
+                    Start-Process $FirefoxPath     #Opens Firefox to manually run the built-in auto update.
+                }
+                Else 
+                {
+                    #Outputs the version of Firefox that is currently installed. (Usfull for troubleshooting in case the script grabbed the wrong version number.)
+                        Write-Verbose "Firefox:  $FirefoxVersion" -Verbose
+                }
+
+#Internet Explorer
+    $IE = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Internet Explorer'
+
 	
 #Variables
     $network = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -ComputerName 127.0.0.1 -Filter "IpEnabled = TRUE"
@@ -275,26 +339,11 @@ $javacom = Invoke-WebRequest "http://www.java.com/en/download/"
     $user = $env:username
     $date =  Get-Date -format s
     $os = Get-WmiObject Win32_operatingSystem
-    $java = Get-WmiObject -Class Win32_Product -Filter "Name like 'Java % Update %'" | Sort-Object Version
-    $flash =  Get-ItemProperty 'HKLM:\SOFTWARE\Macromedia\FlashPlayer\'
-    $IE = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Internet Explorer'
 
-#32 bit applications
-    IF ($system.SystemType -eq "X86-based PC") {
-        $firefox = Get-ItemProperty  'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Mozilla Firefox*'
-	    $chrome = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome'
-    }
-    Else {
-        $firefox = Get-ItemProperty 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Mozilla Firefox*'
-	    $chrome = Get-ItemProperty 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome\'
-    }
+
+
 
 #NULL
-    $firefoxDV = if ([string]::IsNullOrEmpty($firefox.DisplayVersion)) {Write-Output 'NULL'} else {Write-Output $firefox.DisplayVersion}
-    $chromeV = if ([string]::IsNullOrEmpty($chrome.Version)) {Write-Output 'NULL'} else {Write-Output $chrome.Version}
-    $flashCV = if ([string]::IsNullOrEmpty($flash.CurrentVersion)) {Write-Output 'NULL'} else {Write-Output $flash.CurrentVersion}
-          $flashCV = $flashCV.Replace(",",".")
-    $javaV = if ([string]::IsNullOrEmpty($java)) {Write-Output 'NULL'} else {Write-Output $java | Select -Expand Version -Last 1}
     $FirstIP = if ([string]::IsNullOrEmpty($network.IPAddress[0])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[0]}
     $SecondIP = if ([string]::IsNullOrEmpty($network.IPAddress[1])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[1]}
     $FirstSub = if ([string]::IsNullOrEmpty($network.IPSubnet[0])) {Write-Output 'NULL'} else {Write-Output $network.IPSubnet[0]}
@@ -316,22 +365,6 @@ Version.csv: has application and OS versions such as Firefox or Windows.
     Write-Output $ipconfig $netAdapter $route $date " " >> .\Inventory\details\$hn\detailedNetwork.txt
     Write-Output $hn $user $system $bios $date " " >> .\Inventory\details\$hn\detailedSystem.txt
     Write-Output $hn $os $bios $IE $firefox $chrome $flash $java $PSVersionTable $date " " >> .\Inventory\details\$hn\detailedVersion.txt
-
-#run for PowerShell version 2:
-
-#Is Flash updated?
-    $adobecom = Invoke-WebRequest "https://get.adobe.com/flashplayer/"
-    $NewestFlash = $adobecom.AllElements | Where-Object {$_.InnerHtml -like "version *"} | Select-Object innerHTML -First 1
-    Write-Output $NewestFlash > .\inventory\NewestFlash.txt
-    $NewestFlash = Get-Content .\Inventory\NewestFlash.txt
-    if ($flash.CurrentVersion -ne $NewestFlash) {Write-Error -ErrorVariable erFlash -Message "Flash needs to be updated"} else {Write-Output "Flash is up-to-date"}
-
-#Is Java updated?
-    $javacom = Invoke-WebRequest "http://www.java.com/en/download/"
-    $NewestJava = $javacom.AllElements | Where-Object {$_.InnerHtml -like "Version * Update *"} | Select-Object innerHTML -First 1
-    Write-Output $NewestJava > .\inventory\NewestJava.txt
-    $NewestJava = Get-Content .\Inventory\NewestJava.txt
-    if ($javaV.Name -ne $NewestJava) {Write-Error -ErrorVariable erJava -Message "Java needs to be updated"} else {Write-Output "Java is up-to-date"}
 
 
 #Errors
