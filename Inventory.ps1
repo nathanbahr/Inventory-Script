@@ -573,10 +573,10 @@
             Get-Printer >> $DestinationFolder\details\$ComputerName\$Timestamp-Printers.txt
         }
     Write-Output $ComputerName $os $bios $IE $firefox $Chrome $Flash $Java $PSVersionTable $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedVersion.txt   
-	    Get-childitem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\' >> $DestinationFolder\details\$ComputerName\$Timestamp-applications.txt    #lists all installed 32-bit programs in a text file
+	    Get-childitem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\' | Export-Clixml "$DestinationFolder\details\$ComputerName\$Timestamp-applications.xml"    #lists all installed 32-bit programs in a XML file
 	    if ($System.SystemType -eq "X64-based PC")    #only for 64-bit computers
         {
-            Get-childitem 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' >> $DestinationFolder\details\$ComputerName\$Timestamp-applications64.txt    #lists all installed 64-bit programs in a text file
+            Get-childitem 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' | Export-Clixml "$DestinationFolder\details\$ComputerName\$Timestamp-applications64.xml"    #lists all installed 64-bit programs in a XML file
         }
 
 # remove quotes
