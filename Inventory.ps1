@@ -104,6 +104,11 @@
 
 
     #Get newest version number
+    $TestJavaVersion = Test-Path .\NewestFlash.txt
+        If ($TestJavaVersion -like "False")
+        {
+            New-Item .\NewestFlash.txt
+        }
     $NewestFlashFile = Get-ItemProperty .\NewestFlash.txt    #Find the date the file was last modified
     $FlashFileDiffernce = $NewestFlashFile.LastWriteTime-$DateRegular    #Subtract the file date from the current date/time.
     If ($FlashFileDiffernce.Hour -gt 24 -and $PSVersionTable.PSVersion.Major -gt 2)    #Invoke-WebRequest requires PowerShell version 3+.
@@ -193,7 +198,12 @@
         $Java = Write-Output 'NULL'
         Write-Verbose "Java Runtime Environment (JRE): NULL or incorect '*bit' version installed" -Verbose
     }
-
+        
+        $TestJavaVersion = Test-Path .\NewestJava.txt
+        If ($TestJavaVersion -like "False")
+        {
+            New-Item .\NewestJava.txt
+        }
         $NewestJavaFile = Get-ItemProperty .\NewestJava.txt
         $JavaFileDifference = $NewestFlashFile.LastWriteTime-$DateRegular
         If ($javahFileDiffernce.Hour -gt 24 -and $PSVersionTable.PSVersion.Major -gt 2)
