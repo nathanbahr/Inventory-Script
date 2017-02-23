@@ -104,8 +104,8 @@
 
 
     #Get newest version number
-    $TestJavaVersion = Test-Path .\NewestFlash.txt
-        If ($TestJavaVersion -like "False")
+    $TestFlashVersion = Test-Path .\NewestFlash.txt
+        If ($TestFlashVersion -like "False")
         {
             New-Item .\NewestFlash.txt
         }
