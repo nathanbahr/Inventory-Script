@@ -439,8 +439,8 @@
         $Printer = Get-Printer
         $PrinterDriver = Get-PrinterDriver
     }
-    $ProductKey = $SoftwareLicensing.KeyManagementServiceProductKeyID
-        Write-Verbose $ProductKey -Verbose
+    $ProductKey = $SoftwareLicensing.OA3xOriginalProductKey 
+        Write-Verbose "Key: $ProductKey" -Verbose
 
 #Storage
     #$Volume = Get-Volume    #Requires Windows 8 or newer. Using "Get-PSDrive" instead.
