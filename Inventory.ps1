@@ -294,14 +294,14 @@
 
 
 #Firefox
-    IF ($system.SystemType -eq "X86-based PC") 
-    {
+    #IF ($system.SystemType -eq "X86-based PC") 
+    #{
         $FirefoxKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Mozilla Firefox*'
-    }
-    Else 
-    {
-        $FirefoxKey = 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Mozilla Firefox*'
-    }
+    #}
+    #Else 
+    #{
+    #    $FirefoxKey = 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Mozilla Firefox*'
+    #}
 
     $FirefoxTest = Test-Path $FirefoxKey
     $Firefox = If ($FirefoxTest -eq "True") 
@@ -330,7 +330,7 @@
                 Else 
                 {
                     #Outputs the version of Firefox that is currently installed. (Usfull for troubleshooting in case the script grabbed the wrong version number.)
-                        Write-Verbose "Firefox:  $FirefoxVersion" -Verbose
+                        Write-Verbose "Firefox:  $($Firefox.DisplayName)" -Verbose
                 }
 
 #Internet Explorer
