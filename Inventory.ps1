@@ -294,44 +294,40 @@
 
 
 #Firefox
-    #IF ($system.SystemType -eq "X86-based PC") 
-    #{
-        $FirefoxKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Mozilla Firefox*'
-    #}
-    #Else 
-    #{
-    #    $FirefoxKey = 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Mozilla Firefox*'
-    #}
+    $FirefoxKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Mozilla Firefox*'
+    $Firefox64Key = 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Mozilla Firefox*'
 
     $FirefoxTest = Test-Path $FirefoxKey
-    $Firefox = If ($FirefoxTest -eq "True") 
+    If ($FirefoxTest -eq "True")
+    {
+        $Firefox = Get-ItemProperty $FirefoxKey
+        Write-Verbose "$($Firefox.Displayname)" -Verbose
+    } 
+    Else 
+    {
+            $Firefox = 'NULL'
+            Write-Verbose "Firefox 32-bit: NULL" -Verbose
+    }
+
+    $Firefox64Test = Test-Path $Firefox64Key
+    If ($Firefox64Test -eq "True")
+    {
+        $Firefox64 = Get-ItemProperty $Firefox64Key
+        Write-Verbose "$($Firefox64.Displayname)" -Verbose
+    } 
+    Else 
+    {
+        $Firefox64 = 'NULL'
+        Write-Verbose "Firefox 64-bit: NULL" -Verbose
+    }
+
+
+        If ($FirefoxVersion -NotLike "52.0.1") 
         {
-            Get-ItemProperty $FirefoxKey
-        } 
-        else 
-        {
-            Write-Output 'NULL'
+            $FirefoxPath = $Firefox.DisplayIcon -replace ",0",""    #Sets the path to Firefox from the registry.
+            Start-Process $FirefoxPath     #Opens Firefox to manually run the built-in auto update.
         }
 
-            $FirefoxVersion = if ([string]::IsNullOrEmpty($Firefox.DisplayVersion)) 
-                {
-                    Write-Output 'NULL'
-                } 
-                else 
-                {
-                    Write-Output $Firefox.DisplayVersion | Foreach {$_.TrimEnd()}
-                }
-
-                If ($FirefoxVersion -NotLike "51.0.1") 
-                {
-                    $FirefoxPath = $firefox.DisplayIcon -replace ",0",""    #Sets the path to Firefox from the registry.
-                    Start-Process $FirefoxPath     #Opens Firefox to manually run the built-in auto update.
-                }
-                Else 
-                {
-                    #Outputs the version of Firefox that is currently installed. (Usfull for troubleshooting in case the script grabbed the wrong version number.)
-                        Write-Verbose "Firefox:  $($Firefox.DisplayName)" -Verbose
-                }
 
 #Internet Explorer
     $IE = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Internet Explorer'
@@ -530,7 +526,7 @@
         if ($TestInventoryFull -like "False")
         {
             #Makes the CSV file.
-            Write-Output 'ID,Hostname,Timestamp,Serial Number,Manufacturer,Model Number,DHCP,IP Address,Subnet Mask,Second IP,Second Subnet,Default Gateway,Primary DNS,Backup DNS,Primary WINS,Backup WINS,Domain,MAC Address,Network Adapter,Adapter Type,CPU Name,Physical Cores,Logical Cores,Max Frequency,Memory,Free Memory,Pct Used,System Type,Username,Admin Privileges,TeamViewer,AMD GPU,NVIDIA GPU,Intel GPU,Googele Drive,Capacity,Used,Free,Percent Used,Windows Key,OS Name,OS Number,OS Build,SMBIOS,BIOS Version,BIOS Date/Name,Internet Explorer,Firefox,Chrome,Flash,Flash NPAPI,Flash PPAPI,Java,Adobe Reader,PowerShell,AMD Driver,NVIDIA Driver,Intel Driver,McAfee,IP1,IP2,IP3,IP4' >> $DestinationFolder\InventoryFull.csv
+            Write-Output 'ID,Hostname,Timestamp,Serial Number,Manufacturer,Model Number,DHCP,IP Address,Subnet Mask,Second IP,Second Subnet,Default Gateway,Primary DNS,Backup DNS,Primary WINS,Backup WINS,Domain,MAC Address,Network Adapter,Adapter Type,CPU Name,Physical Cores,Logical Cores,Max Frequency,Memory,Free Memory,Pct Used,System Type,Username,Admin Privileges,TeamViewer,AMD GPU,NVIDIA GPU,Intel GPU,Googele Drive,Capacity,Used,Free,Percent Used,Windows Key,OS Name,OS Number,OS Build,SMBIOS,BIOS Version,BIOS Date/Name,Internet Explorer,Firefox 32-bit,Firefox 64-bit,Chrome,Flash,Flash NPAPI,Flash PPAPI,Java,Adobe Reader,PowerShell,AMD Driver,NVIDIA Driver,Intel Driver,McAfee,IP1,IP2,IP3,IP4' >> $DestinationFolder\InventoryFull.csv
         }
 
 
@@ -555,7 +551,7 @@
         }
 #>
 
-    <#Full#> Write-Output "$($id),$($ComputerName),$($date),$($bios.SerialNumber),$($system.Manufacturer),$($system.Model),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter),$($CPU.Name),$($CPU.NumberOfCores),$($CPU.NumberOfLogicalProcessors),$($MaxGHz),$($memory) GB,$($FreeMemory) GB,$($FreeMemoryPercent) %,$($system.SystemType),$($user),$($AdminPrivileges),$($TeamViewer.ClientID),$($AMDVidDriverName.Name),$($NVIDIAVidDriverName.Name),$($IntelVidDriverName.Name),$($GoogleDrive),$($CDriveCapacity) GB,$($CDriveUsed) GB,$($CDriveFree) GB,$($CDrivePercentUsed),$($ProductKey),$($os.Caption -replace 'Microsoft ',''),$($SoftwareLicensing.version<#$os.Version#>),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.svcVersion),$($FirefoxVersion),$($Chrome.Version),$($Flash),$($FlashNPAPI.Version),$($FlashPPAPI.Version),$($Java.DisplayVersion),$($Reader.DisplayVersion),$($PSVersionTable.PSVersion),$($AMDVidDriverVersion.DriverVersion),$($NVIDIAVidDriverVersion.DriverVersion),$($IntelVidDriverVersion.DriverVersion),$($McAfeeAgent),$($oct0),$($oct1),$($oct2),$($oct3)" >> $DestinationFolder\InventoryFull.csv
+    <#Full#> Write-Output "$($id),$($ComputerName),$($date),$($bios.SerialNumber),$($system.Manufacturer),$($system.Model),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter),$($CPU.Name),$($CPU.NumberOfCores),$($CPU.NumberOfLogicalProcessors),$($MaxGHz),$($memory) GB,$($FreeMemory) GB,$($FreeMemoryPercent) %,$($system.SystemType),$($user),$($AdminPrivileges),$($TeamViewer.ClientID),$($AMDVidDriverName.Name),$($NVIDIAVidDriverName.Name),$($IntelVidDriverName.Name),$($GoogleDrive),$($CDriveCapacity) GB,$($CDriveUsed) GB,$($CDriveFree) GB,$($CDrivePercentUsed),$($ProductKey),$($os.Caption -replace 'Microsoft ',''),$($SoftwareLicensing.version<#$os.Version#>),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.svcVersion),$($Firefox.DisplayVersion),$($Firefox64.DisplayVersion),$($Chrome.Version),$($Flash),$($FlashNPAPI.Version),$($FlashPPAPI.Version),$($Java.DisplayVersion),$($Reader.DisplayVersion),$($PSVersionTable.PSVersion),$($AMDVidDriverVersion.DriverVersion),$($NVIDIAVidDriverVersion.DriverVersion),$($IntelVidDriverVersion.DriverVersion),$($McAfeeAgent),$($oct0),$($oct1),$($oct2),$($oct3)" >> $DestinationFolder\InventoryFull.csv
 
 
   #  <#Network#> Write-Output "$($id),$($ComputerName),$($date),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter)" >> $DestinationFolder\Network.csv
