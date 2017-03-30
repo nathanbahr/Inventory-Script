@@ -111,7 +111,7 @@
         }
     $NewestFlashFile = Get-ItemProperty .\NewestFlash.txt    #Find the date the file was last modified
     $FlashFileDiffernce = $NewestFlashFile.LastWriteTime-$DateRegular    #Subtract the file date from the current date/time.
-    If ($FlashFileDiffernce.Hour -gt 24 -and $PSVersionTable.PSVersion.Major -gt 2)    #Invoke-WebRequest requires PowerShell version 3+.
+    If ($FlashFileDiffernce.Days*-1 -gt 1 -and $PSVersionTable.PSVersion.Major -gt 2)    #Invoke-WebRequest requires PowerShell version 3+.
     {
         #Is Flash updated? 
         $adobecom = Invoke-WebRequest "https://get.adobe.com/flashplayer/"                                                         #Check Adobe's website for the latest version number.
@@ -206,7 +206,7 @@
         }
         $NewestJavaFile = Get-ItemProperty .\NewestJava.txt
         $JavaFileDifference = $NewestFlashFile.LastWriteTime-$DateRegular
-        If ($javahFileDiffernce.Hour -gt 24 -and $PSVersionTable.PSVersion.Major -gt 2)
+        If ($javahFileDiffernce.Days*-1 -gt 1 -and $PSVersionTable.PSVersion.Major -gt 2)
         {
             #Is Java updated?
             $javacom = Invoke-WebRequest "http://www.java.com/en/download/"
