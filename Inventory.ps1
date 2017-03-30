@@ -23,7 +23,7 @@
 #Details Folder
     $ComputerName = hostname
     $dirDetail = Test-Path "$DestinationFolder\details\$ComputerName"
-        If ($dirDetail -eq "True") 
+        If ($dirDetail -eq "True")
         {
             Write-Verbose "Writing to: $DestinationFolder\details\$ComputerName" -Verbose
         } 
