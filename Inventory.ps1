@@ -565,10 +565,10 @@
     <#IronRidge#> If ($DestinationFolder -like ".\IronRidge\*") {
                         $TestVersion = Test-Path $DestinationFolder\IronRidge.csv
                             if ($TestVersion -like 'False') {
-                                Write-Output 'Timestamp,Hostname,Date,User Name,Type,Model Name,Serial Number,OS,Memory,TeamViewer,Google Drive' >> $DestinationFolder\IronRidge.csv
+                                Write-Output 'Timestamp,User Name,Employees,Tag,Hostname,Date,Type,Model Name,Serial Number,OS,Memory,TeamViewer,Google Drive' >> $DestinationFolder\IronRidge.csv
                             }
-                        Write-Output ",,$($date),$($user),$($DateReadable),$($ComputerName),Laptop,$($system.Model),$($bios.SerialNumber),$($os.Caption -replace 'Microsoft ',''),$($memory) GB,$($TeamViewer.ClientID),$($GoogleDrive)" >> $DestinationFolder\IronRidge.csv
-                     }
+                        Write-Output "$($date),$($user),,,$($DateReadable),$($ComputerName),Laptop,$($system.Model),$($bios.SerialNumber),$($os.Caption -replace 'Microsoft ',''),$($memory) GB,$($TeamViewer.ClientID),$($GoogleDrive)" >> $DestinationFolder\IronRidge.csv
+                  }
 
 #Makes three text files with detailed information about computer.
     Write-Output $ipconfig $netAdapter $route $Firewall $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedNetwork.txt
