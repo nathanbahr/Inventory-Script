@@ -322,12 +322,13 @@
     }
 
 
-        If ($FirefoxVersion -NotLike "52.0.1") 
+<#
+        If ($FirefoxVersion -NotLike "52.0.2") 
         {
             $FirefoxPath = $Firefox.DisplayIcon -replace ",0",""    #Sets the path to Firefox from the registry.
             Start-Process $FirefoxPath     #Opens Firefox to manually run the built-in auto update.
         }
-
+#>
 
 #Internet Explorer
     $IE = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Internet Explorer'
