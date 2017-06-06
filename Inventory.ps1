@@ -565,9 +565,9 @@
     <#IronRidge#> If ($DestinationFolder -like ".\IronRidge\*") {
                         $TestVersion = Test-Path $DestinationFolder\IronRidge.csv
                             if ($TestVersion -like 'False') {
-                                Write-Output 'Timestamp,User Name,Employees,Tag,Hostname,Date,Type,Model Name,Serial Number,OS,Memory,TeamViewer,Google Drive' >> $DestinationFolder\IronRidge.csv
+                                Write-Output 'Timestamp,User Name,Employees,Active,Tag,Date Checked,Hostname,Asset,Model Name,Category,Serial Number,OS,Memory,Storage,TeamViewer,Google Drive,Special Programs,Location,Encrypted' >> $DestinationFolder\IronRidge.csv
                             }
-                        Write-Output "$($date),$($user),,,$($DateReadable),$($ComputerName),Laptop,$($system.Model),$($bios.SerialNumber),$($os.Caption -replace 'Microsoft ',''),$($memory) GB,$($TeamViewer.ClientID),$($GoogleDrive)" >> $DestinationFolder\IronRidge.csv
+                        Write-Output "$($date),$($user),,,,$($DateReadable),$($ComputerName),Laptop,$($system.Model),,$($bios.SerialNumber),$($os.Caption -replace 'Microsoft ',''),$($memory) GB,,$($TeamViewer.ClientID),$($GoogleDrive)" >> $DestinationFolder\IronRidge.csv
                   }
 
 #Makes three text files with detailed information about computer.
