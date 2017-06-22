@@ -410,7 +410,7 @@
     $TeamViewerTest = Test-Path $TeamViewerKey
         If ($TeamViewerTest -eq "True") 
         {
-            $TeamViewer = gp $TeamViewerKey
+            $TeamViewer = Get-ItemProperty $TeamViewerKey
             Write-Verbose "TeamViewer: $($TeamViewer.ClientID)" -Verbose
         } 
         Else
