@@ -9,7 +9,7 @@
     $Timestamp = Get-Date -Format o | foreach {$_ -replace ":", "."}
 
 #Destination Folder
-    $DestinationFolder = '.\Library\Inventory'
+    $DestinationFolder = '.\Computers\IronRidge\Inventory'
     $DestinationFolderPath = Test-Path $DestinationFolder
         If ($DestinationFolderPath -eq 'True') 
         {
@@ -451,6 +451,8 @@
 
 #Storage
     #$Volume = Get-Volume    #Requires Windows 8 or newer. Using "Get-PSDrive" instead.
+    $DiskDrives = Get-WMIObject Win32_DiskDrive
+    $CDriveModel = ($DiskDrives | Where-Object {$_.deviceID -eq "\\.\PHYSICALDRIVE0"}).Model
     $CDrive = Get-PSDrive -Name C
         $CDriveUsed = $CDrive | ForEach-Object {[math]::Round($_.used / 1GB)}
         $CDriveFree = $CDrive | ForEach-Object {[math]::Round($_.free / 1GB)}
@@ -552,27 +554,27 @@
         }
 #>
 
-    <#Full#> Write-Output "$($id),$($ComputerName),$($date),$($bios.SerialNumber),$($system.Manufacturer),$($system.Model),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter),$($CPU.Name),$($CPU.NumberOfCores),$($CPU.NumberOfLogicalProcessors),$($MaxGHz),$($memory) GB,$($FreeMemory) GB,$($FreeMemoryPercent) %,$($system.SystemType),$($user),$($AdminPrivileges),$($TeamViewer.ClientID),$($AMDVidDriverName.Name),$($NVIDIAVidDriverName.Name),$($IntelVidDriverName.Name),$($GoogleDrive),$($CDriveCapacity) GB,$($CDriveUsed) GB,$($CDriveFree) GB,$($CDrivePercentUsed),$($ProductKey),$($os.Caption -replace 'Microsoft ',''),$($SoftwareLicensing.version<#$os.Version#>),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.svcVersion),$($Firefox.DisplayVersion),$($Firefox64.DisplayVersion),$($Chrome.Version),$($Flash),$($FlashNPAPI.Version),$($FlashPPAPI.Version),$($Java.DisplayVersion),$($Reader.DisplayVersion),$($PSVersionTable.PSVersion),$($AMDVidDriverVersion.DriverVersion),$($NVIDIAVidDriverVersion.DriverVersion),$($IntelVidDriverVersion.DriverVersion),$($McAfeeAgent),$($oct0),$($oct1),$($oct2),$($oct3)" >> $DestinationFolder\InventoryFull.csv
+    <#Full#> Write-Output "$($id),$($ComputerName),$($date),$($bios.SerialNumber),$($system.Manufacturer),$($system.Model),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter),$($CPU.Name),$($CPU.NumberOfCores),$($CPU.NumberOfLogicalProcessors),$($MaxGHz),$($memory) GB,$($FreeMemory) GB,$($FreeMemoryPercent) %,$($system.SystemType),$($user),$($AdminPrivileges),$($TeamViewer.ClientID),$($AMDVidDriverName.Name),$($NVIDIAVidDriverName.Name),$($IntelVidDriverName.Name),$($GoogleDrive),$($CDriveModel),$($CDriveCapacity) GB,$($CDriveUsed) GB,$($CDriveFree) GB,$($CDrivePercentUsed),$($ProductKey),$($os.Caption -replace 'Microsoft ',''),$($SoftwareLicensing.version<#$os.Version#>),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.svcVersion),$($Firefox.DisplayVersion),$($Firefox64.DisplayVersion),$($Chrome.Version),$($Flash),$($FlashNPAPI.Version),$($FlashPPAPI.Version),$($Java.DisplayVersion),$($Reader.DisplayVersion),$($PSVersionTable.PSVersion),$($AMDVidDriverVersion.DriverVersion),$($NVIDIAVidDriverVersion.DriverVersion),$($IntelVidDriverVersion.DriverVersion),$($McAfeeAgent),$($oct0),$($oct1),$($oct2),$($oct3)" >> $DestinationFolder\InventoryFull.csv
 
 
   #  <#Network#> Write-Output "$($id),$($ComputerName),$($date),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter)" >> $DestinationFolder\Network.csv
   #  <#System#> Write-Output "$($id),$($ComputerName),$($date),$($system.Manufacturer),$($system.Model),$($bios.SerialNumber),$($CPU.Name),$($CPU.NumberOfCores),$($CPU.NumberOfLogicalProcessors),$($MaxGHz),$($memory) GB,$($FreeMemory) GB,$($FreeMemoryPercent) %,$($system.SystemType),$($user),$($AdminPrivileges),$($TeamViewer.ClientID),$($AMDVidDriverName.Name),$($NVIDIAVidDriverName.Name),$($IntelVidDriverName.Name),$($GoogleDrive),$($CDriveCapacity) GB,$($CDriveUsed) GB,$($CDriveFree) GB,$($CDrivePercentUsed),$($ProductKey)" >> $DestinationFolder\System.csv
   #  <#Version#> Write-Output "$($id),$($ComputerName),$($date),$($os.Caption -replace 'Microsoft ',''),$($SoftwareLicensing.version<#$os.Version#>),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.svcVersion),$($FirefoxVersion),$($Chrome.Version),$($Flash),$($FlashNPAPI.Version),$($FlashPPAPI.Version),$($Java.DisplayVersion),$($Reader.DisplayVersion),$($PSVersionTable.PSVersion),$($AMDVidDriverVersion.DriverVersion),$($NVIDIAVidDriverVersion.DriverVersion),$($IntelVidDriverVersion.DriverVersion),$($McAfeeAgent)" >> $DestinationFolder\Version.csv
 
-    <#Library#> If ($DestinationFolder -like ".\Library\*") {
+    <#Library#> If ($DestinationFolder -like "*\Library\*") {
                     Write-Output "$($ComputerName),$($date),$($FirstIP),<#Description#>,$($user),$($AdminPrivileges),$($system.Model),$($bios.SerialNumber),<#Patch Port#>,<#Extension/Switch>,<#Location#>," >> $DestinationFolder\Library.csv
                 }
-    <#IronRidge#> If ($DestinationFolder -like ".\IronRidge\*") {
+    <#IronRidge#> If ($DestinationFolder -like "*\IronRidge\*") {
                         $TestVersion = Test-Path $DestinationFolder\IronRidge.csv
                             if ($TestVersion -like 'False') {
                                 Write-Output 'Timestamp,User Name,Employees,Active,Tag,Date Checked,Hostname,Asset,Model Name,Category,Serial Number,OS,Memory,Storage,TeamViewer,Google Drive,Special Programs,Location,Encrypted' >> $DestinationFolder\IronRidge.csv
                             }
-                        Write-Output "$($date),$($user),,,,$($DateReadable),$($ComputerName),Laptop,$($system.Model),,$($bios.SerialNumber),$($os.Caption -replace 'Microsoft ',''),$($memory) GB,,$($TeamViewer.ClientID),$($GoogleDrive)" >> $DestinationFolder\IronRidge.csv
+                        Write-Output "$($date),$($user),,,,$($DateReadable),$($ComputerName),Laptop,$($system.Model),,$($bios.SerialNumber),$($os.Caption -replace 'Microsoft ',''),$($memory) GB,$($CDriveModel),$($TeamViewer.ClientID),$($GoogleDrive)" >> $DestinationFolder\IronRidge.csv
                   }
 
 #Makes three text files with detailed information about computer.
     Write-Output $ipconfig $netAdapter $route $Firewall $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedNetwork.txt
-    Write-Output $ComputerName $user $system $CPU $bios $NetUser $AdminUsers $VidDriver <#$Printer#> <#$PrinterDriver#> <#'Get-Volume' $Volume#> $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
+    Write-Output $ComputerName $user $system $CPU $bios $NetUser $AdminUsers $VidDriver <#$Printer#> <#$PrinterDriver#> $DiskDrives $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
     Get-WmiObject SoftwareLicensingService >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
         if ($os.Version -gt "6.1.7601")
         {
