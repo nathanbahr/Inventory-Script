@@ -6,10 +6,10 @@
     $Date =  Get-Date -format s
     $DateRegular = Get-Date
     $DateReadable = Get-Date -Format g
-    $Timestamp = Get-Date -Format o | foreach {$_ -replace ":", "."}
+    $Timestamp = Get-Date -Format o | ForEach-Object {$_ -replace ":", "."}
 
 #Destination Folder
-    $DestinationFolder = '.\Computers\IronRidge\Inventory'
+    $DestinationFolder = '.\Computers\Testy\Inventory'
     $DestinationFolderPath = Test-Path $DestinationFolder
         If ($DestinationFolderPath -eq 'True') 
         {
@@ -53,7 +53,7 @@
              }
              else 
              {
-                 Write-Output $Flash.CurrentVersion | foreach {$_ -replace ",", "."}     #Replaces commas “,” with periods “.” for consistency.
+                 Write-Output $Flash.CurrentVersion | ForEach-Object {$_ -replace ",", "."}     #Replaces commas “,” with periods “.” for consistency.
              }
         Write-Verbose "Old Flash: $($Flash)" -Verbose
 
@@ -117,7 +117,7 @@
         $adobecom = Invoke-WebRequest "https://get.adobe.com/flashplayer/"                                                         #Check Adobe's website for the latest version number.
         $NewestFlash = $adobecom.AllElements | Where-Object {$_.InnerHtml -like "version *"} | Select-Object innerHTML -First 1    #Select the version number from the webpage.
             Write-Output $NewestFlash.innerHTML > .\NewestFlash.txt                                                                #Write it to a file.
-            (Get-Content .\NewestFlash.txt) -replace 'Version ','' | Foreach {$_.TrimEnd()} | Set-Content .\NewestFlash.txt        #Cleanup the output and make it ready to be read.
+            (Get-Content .\NewestFlash.txt) -replace 'Version ','' | ForEach-Object {$_.TrimEnd()} | Set-Content .\NewestFlash.txt        #Cleanup the output and make it ready to be read.
     }
     Else 
     {
@@ -153,15 +153,15 @@
                     {
                         0 
                         {
-			                $FlashInstallers = Get-ChildItem ".\flash\flashplayer*install.exe"	
-                            foreach ($Installer in $FlashInstallers) 
+			            <#    $FlashInstallers = Get-ChildItem ".\flash\flashplayer*install.exe"	
+                            ForEach-Object ($Installer in $FlashInstallers) 
                             {
                                 Copy-Item $Installer $env:TEMP
                                 Start-Process $Installer -Wait
                             }
                             #clean up
                             Remove-Item "$env:TEMP\flashplayer*install.exe"
-                               
+                        #>       
                         }
                         1 
                         {
@@ -190,7 +190,7 @@
     $JavaTest = Test-Path $JavaKey    #test to see if Java is installed
     If ($JavaTest -eq "True")    #if it is...
     {
-        $Java = Get-ItemProperty $JavaKey | where {$_.DisplayName -like 'Java *'}    #Get the properties of the correct registry key
+        $Java = Get-ItemProperty $JavaKey | Where-Object {$_.DisplayName -like 'Java *'}    #Get the properties of the correct registry key
         Write-Verbose "Java Runtime Environment (JRE): $($Java.DisplayVersion)" -Verbose    #Display the version of JRE to the console
     }
     Else
@@ -213,7 +213,7 @@
             $NewestJava = $javacom.AllElements | Where-Object {$_.InnerHtml -like "Version * Update *"} | Select-Object innerHTML -First 1
                 Write-Output $NewestJava.innerHTML > .\NewestJava.txt
                 
-                (Get-Content .\NewestJava.txt) -replace 'Version','Java' | Foreach {$_.TrimEnd()} | Set-Content .\NewestJava.txt    #Replaces the word 'Version' that is pulled from the web page to 'Java' to match what is in WMI.
+                (Get-Content .\NewestJava.txt) -replace 'Version','Java' | ForEach-Object {$_.TrimEnd()} | Set-Content .\NewestJava.txt    #Replaces the word 'Version' that is pulled from the web page to 'Java' to match what is in WMI.
         }
         Else
         {
@@ -221,7 +221,7 @@
         }
 
       #removes 64-bit from the Java name so just the version is compared.
-        $JavaName = $Java.DisplayName -replace "\(64-bit\)","" | Foreach {$_.TrimEnd()}
+        $JavaName = $Java.DisplayName -replace "\(64-bit\)","" | ForEach-Object {$_.TrimEnd()}
         $NewestJava = (Get-Content .\NewestJava.txt)
         
         If ($JavaName -NotLike $NewestJava) 
@@ -430,7 +430,7 @@
         $MaxGHz = "$($MaxGHz / 100) GHz"    #Adds the decimal place and GHz label.
         
 
-    $memory = Get-WmiObject Win32_computersystem | foreach-object {[math]::round($_.totalPhysicalMemory / 1GB)}   #Displays the amount of system memory rounded to the nearest gigabyte.
+    $memory = Get-WmiObject Win32_computersystem | ForEach-Object {[math]::round($_.totalPhysicalMemory / 1GB)}   #Displays the amount of system memory rounded to the nearest gigabyte.
         Write-Output "RAM: $($memory) GB"
        
         $FreeMemory = [math]::Round($os.FreePhysicalMemory/1mb,2)
@@ -589,7 +589,7 @@
         }
 
 # remove quotes
-    foreach ($file in Get-ChildItem $DestinationFolder\*.csv)    #Selects the files
+    Get-ChildItem $DestinationFolder\*.csv | ForEach-Object {$_.Name}   #Selects the files
     {
         (Get-Content $file) -replace '"','' | Set-Content $file    #Replaces quotes with a blank space
     }
