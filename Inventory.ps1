@@ -467,45 +467,46 @@
 #Video Driver
     $VidDriver = Get-WmiObject win32_VideoController
 
-        If ([string]::IsNullOrEmpty($($VidDriver | Where {$_.Name -Like "*AMD*"})))    #Sees if an AMD GPU is instlled
+        $AMDVidDriver = $VidDriver | Where-Object {$_.Name -Like "*AMD*" -or "*Radeon*"}
+        If ([string]::IsNullOrEmpty($AMDVidDriver))    #Sees if an AMD GPU is instlled
         {
             $AMDVidDriver = 'NULL'    #If not, mark as empty
         }
         Else
         {
-            $AMDVidDriver = $VidDriver | Where {$_.Name -Like "*AMD*"}
-            $AMDVidDriverVersion = $AMDVidDriver | Select DriverVersion -First 1
-            $AMDVidDriverName = $AMDVidDriver | Select Name -First 1
+            
+            $AMDVidDriverVersion = $AMDVidDriver | Select-Object DriverVersion -First 1
+            $AMDVidDriverName = $AMDVidDriver | Select-Object Name -First 1
             Write-Output "$($AMDVidDriverName.Name)"
             Write-Verbose "AMD Driver: $($AMDVidDriverVersion.DriverVersion)" -Verbose
         }
 
 
         
-        If ([string]::IsNullOrEmpty($($VidDriver | Where {$_.Name -Like "*Intel*"})))    #Sees if an Intel GPU is instlled
+        If ([string]::IsNullOrEmpty($($VidDriver | Where-Object {$_.Name -Like "*Intel*"})))    #Sees if an Intel GPU is instlled
         {
             $IntelVidDriver = 'NULL'
         } 
         Else 
         {
-            $IntelVidDriver = $VidDriver | Where {$_.Name -Like "*Intel*"}
-            $IntelVidDriverVersion = $IntelVidDriver | Select DriverVersion -First 1
-            $IntelVidDriverName = $IntelVidDriver | Select Name -First 1
+            $IntelVidDriver = $VidDriver | Where-Object {$_.Name -Like "*Intel*"}
+            $IntelVidDriverVersion = $IntelVidDriver | Select-Object DriverVersion -First 1
+            $IntelVidDriverName = $IntelVidDriver | Select-Object Name -First 1
             Write-Output "$($IntelVidDriverName.Name)"    #GPU model name
             Write-Verbose "Intel Driver: $($IntelVidDriverVersion.DriverVersion)" -Verbose    #GPU driver version
 
         }
             
         
-        If ([string]::IsNullOrEmpty($($VidDriver | Where {$_.Name -Like "*NVIDIA*"})))    #Sees if a NVIDIA GPU is instlled
+        If ([string]::IsNullOrEmpty($($VidDriver | Where-Object {$_.Name -Like "*NVIDIA*"})))    #Sees if a NVIDIA GPU is instlled
         {
             $NVIDIAVidDriver = 'NULL'
         }
         Else
         {
             $NVIDIAVidDriver = $VidDriver | Where {$_.Name -Like "*NVIDIA*"}
-            $NVIDIAVidDriverVersion = $NVIDIAVidDriver | Select DriverVersion -First 1
-            $NVIDIAVidDriverName = $NVIDIAVidDriver | Select Name -First 1
+            $NVIDIAVidDriverVersion = $NVIDIAVidDriver | Select-Object DriverVersion -First 1
+            $NVIDIAVidDriverName = $NVIDIAVidDriver | Select-Object Name -First 1
             Write-Output "$($NVIDIAVidDriverName.Name)"
             Write-Verbose "NVIDIA Driver: $($NVIDIAVidDriverVersion.DriverVersion)" -Verbose
             
