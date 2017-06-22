@@ -205,7 +205,7 @@
             New-Item .\NewestJava.txt
         }
         $NewestJavaFile = Get-ItemProperty .\NewestJava.txt
-        $JavaFileDifference = $NewestFlashFile.LastWriteTime-$DateRegular
+        $JavaFileDifference = $NewestJavahFile.LastWriteTime-$DateRegular
         If ($javahFileDiffernce.Days*-1 -gt 1 -and $PSVersionTable.PSVersion.Major -gt 2)
         {
             #Is Java updated?
