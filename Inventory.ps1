@@ -9,7 +9,7 @@
     $Timestamp = Get-Date -Format o | ForEach-Object {$_ -replace ":", "."}
 
 #Destination Folder
-    $DestinationFolder = '.\Computers\Testy\Inventory'
+    $DestinationFolder = '.\Computers\Testy'
     $DestinationFolderPath = Test-Path $DestinationFolder
         If ($DestinationFolderPath -eq 'True') 
         {
