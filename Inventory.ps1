@@ -525,46 +525,19 @@
             Write-Output "Current user does not have administrator privileges."
         }
 
-
-    $TestInventoryFull = Test-Path $DestinationFolder\InventoryFull.csv    #Creates the files used to store the retrieved data if they do not exist.
-        if ($TestInventoryFull -like "False")
-        {
-            #Makes the CSV file.
-            Write-Output 'ID,Hostname,Timestamp,Serial Number,Manufacturer,Model Number,DHCP,IP Address,Subnet Mask,Second IP,Second Subnet,Default Gateway,Primary DNS,Backup DNS,Primary WINS,Backup WINS,Domain,MAC Address,Network Adapter,Adapter Type,CPU Name,Physical Cores,Logical Cores,Max Frequency,Memory,Free Memory,Pct Used,System Type,Username,Admin Privileges,TeamViewer,AMD GPU,NVIDIA GPU,Intel GPU,Googele Drive,Capacity,Used,Free,Percent Used,Windows Key,OS Name,OS Number,OS Build,SMBIOS,BIOS Version,BIOS Date/Name,Internet Explorer,Firefox 32-bit,Firefox 64-bit,Chrome,Flash,Flash NPAPI,Flash PPAPI,Java,Adobe Reader,PowerShell,AMD Driver,NVIDIA Driver,Intel Driver,McAfee,IP1,IP2,IP3,IP4' >> $DestinationFolder\InventoryFull.csv
-        }
-
-
-
-<#
-    $TestNetwork = Test-Path $DestinationFolder\Network.csv
-        if ($TestNetwork -like "False") 
-        {
-            Write-Output 'ID,Hostname,Date,DHC,IP Address,Subnet Mask,Second IP,Second Subnet,Default Gateway,Primary DNS,Backup DNS,Primary WINS,Backup WINS,Domain,MAC Address,Network Adapter,Adapter Type' >> $DestinationFolder\Network.csv
-        }
-    
-    $TestSystem = Test-Path $DestinationFolder\System.csv
-        if ($TestSystem -like 'False') 
-        {
-            Write-Output 'ID,Hostname,Date,Manufacturer,Model Name,Serial Number,CPU Name,Physical Cores,Logical Cores,Max Frequency,Memory,System Type,Username,Admin Privileges,TeamViewer,AMD GPU,NVIDIA GPU,Intel GPU,Googele Drive,Capacity,Used,Free' >> $DestinationFolder\System.csv
-        }
-
-    $TestVersion = Test-Path $DestinationFolder\Version.csv
-        if ($TestVersion -like 'False') 
-        {
-            Write-Output 'ID,Hostname,Date,OS Name,OS Number,OS Build,SMBIOS,BIOS Version,BIOS Date/Name,Internet Explorer,Firefox,Chrome,Flash,Java,Adobe Reader,PowerShell,AMD Driver,NVIDIA Driver,Intel Driver,McAfee' >> $DestinationFolder\Version.csv
-        }
-#>
-
-    <#Full#> Write-Output "$($id),$($ComputerName),$($date),$($bios.SerialNumber),$($system.Manufacturer),$($system.Model),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter),$($CPU.Name),$($CPU.NumberOfCores),$($CPU.NumberOfLogicalProcessors),$($MaxGHz),$($memory) GB,$($FreeMemory) GB,$($FreeMemoryPercent) %,$($system.SystemType),$($user),$($AdminPrivileges),$($TeamViewer.ClientID),$($AMDVidDriverName.Name),$($NVIDIAVidDriverName.Name),$($IntelVidDriverName.Name),$($GoogleDrive),$($CDriveModel),$($CDriveCapacity) GB,$($CDriveUsed) GB,$($CDriveFree) GB,$($CDrivePercentUsed),$($ProductKey),$($os.Caption -replace 'Microsoft ',''),$($SoftwareLicensing.version<#$os.Version#>),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.svcVersion),$($Firefox.DisplayVersion),$($Firefox64.DisplayVersion),$($Chrome.Version),$($Flash),$($FlashNPAPI.Version),$($FlashPPAPI.Version),$($Java.DisplayVersion),$($Reader.DisplayVersion),$($PSVersionTable.PSVersion),$($AMDVidDriverVersion.DriverVersion),$($NVIDIAVidDriverVersion.DriverVersion),$($IntelVidDriverVersion.DriverVersion),$($McAfeeAgent),$($oct0),$($oct1),$($oct2),$($oct3)" >> $DestinationFolder\InventoryFull.csv
-
-
-  #  <#Network#> Write-Output "$($id),$($ComputerName),$($date),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter)" >> $DestinationFolder\Network.csv
-  #  <#System#> Write-Output "$($id),$($ComputerName),$($date),$($system.Manufacturer),$($system.Model),$($bios.SerialNumber),$($CPU.Name),$($CPU.NumberOfCores),$($CPU.NumberOfLogicalProcessors),$($MaxGHz),$($memory) GB,$($FreeMemory) GB,$($FreeMemoryPercent) %,$($system.SystemType),$($user),$($AdminPrivileges),$($TeamViewer.ClientID),$($AMDVidDriverName.Name),$($NVIDIAVidDriverName.Name),$($IntelVidDriverName.Name),$($GoogleDrive),$($CDriveCapacity) GB,$($CDriveUsed) GB,$($CDriveFree) GB,$($CDrivePercentUsed),$($ProductKey)" >> $DestinationFolder\System.csv
-  #  <#Version#> Write-Output "$($id),$($ComputerName),$($date),$($os.Caption -replace 'Microsoft ',''),$($SoftwareLicensing.version<#$os.Version#>),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.svcVersion),$($FirefoxVersion),$($Chrome.Version),$($Flash),$($FlashNPAPI.Version),$($FlashPPAPI.Version),$($Java.DisplayVersion),$($Reader.DisplayVersion),$($PSVersionTable.PSVersion),$($AMDVidDriverVersion.DriverVersion),$($NVIDIAVidDriverVersion.DriverVersion),$($IntelVidDriverVersion.DriverVersion),$($McAfeeAgent)" >> $DestinationFolder\Version.csv
+#Output
+    <#Full#> $TestInventoryFull = Test-Path $DestinationFolder\InventoryFull.csv    #Creates the files used to store the retrieved data if they do not exist.
+                if ($TestInventoryFull -like "False")
+                {
+                    #Makes the CSV file.
+                    Write-Output 'ID,Hostname,Timestamp,Serial Number,Manufacturer,Model Number,DHCP,IP Address,Subnet Mask,Second IP,Second Subnet,Default Gateway,Primary DNS,Backup DNS,Primary WINS,Backup WINS,Domain,MAC Address,Network Adapter,Adapter Type,CPU Name,Physical Cores,Logical Cores,Max Frequency,Memory,Free Memory,Pct Used,System Type,Username,Admin Privileges,TeamViewer,AMD GPU,NVIDIA GPU,Intel GPU,Googele Drive,Capacity,Used,Free,Percent Used,Windows Key,OS Name,OS Number,OS Build,SMBIOS,BIOS Version,BIOS Date/Name,Internet Explorer,Firefox 32-bit,Firefox 64-bit,Chrome,Flash,Flash NPAPI,Flash PPAPI,Java,Adobe Reader,PowerShell,AMD Driver,NVIDIA Driver,Intel Driver,McAfee,IP1,IP2,IP3,IP4' >> $DestinationFolder\InventoryFull.csv
+                }
+        Write-Output "$($id),$($ComputerName),$($date),$($bios.SerialNumber),$($system.Manufacturer),$($system.Model),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter),$($CPU.Name),$($CPU.NumberOfCores),$($CPU.NumberOfLogicalProcessors),$($MaxGHz),$($memory) GB,$($FreeMemory) GB,$($FreeMemoryPercent) %,$($system.SystemType),$($user),$($AdminPrivileges),$($TeamViewer.ClientID),$($AMDVidDriverName.Name),$($NVIDIAVidDriverName.Name),$($IntelVidDriverName.Name),$($GoogleDrive),$($CDriveModel),$($CDriveCapacity) GB,$($CDriveUsed) GB,$($CDriveFree) GB,$($CDrivePercentUsed),$($ProductKey),$($os.Caption -replace 'Microsoft ',''),$($SoftwareLicensing.version<#$os.Version#>),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.svcVersion),$($Firefox.DisplayVersion),$($Firefox64.DisplayVersion),$($Chrome.Version),$($Flash),$($FlashNPAPI.Version),$($FlashPPAPI.Version),$($Java.DisplayVersion),$($Reader.DisplayVersion),$($PSVersionTable.PSVersion),$($AMDVidDriverVersion.DriverVersion),$($NVIDIAVidDriverVersion.DriverVersion),$($IntelVidDriverVersion.DriverVersion),$($McAfeeAgent),$($oct0),$($oct1),$($oct2),$($oct3)" >> $DestinationFolder\InventoryFull.csv
 
     <#Library#> If ($DestinationFolder -like "*\Library\*") {
                     Write-Output "$($ComputerName),$($date),$($FirstIP),<#Description#>,$($user),$($AdminPrivileges),$($system.Model),$($bios.SerialNumber),<#Patch Port#>,<#Extension/Switch>,<#Location#>," >> $DestinationFolder\Library.csv
                 }
+
     <#IronRidge#> If ($DestinationFolder -like "*\IronRidge\*") {
                         $TestVersion = Test-Path $DestinationFolder\IronRidge.csv
                             if ($TestVersion -like 'False') {
