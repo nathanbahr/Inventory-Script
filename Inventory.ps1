@@ -590,7 +590,7 @@
         }
 
 # remove quotes
-    Get-ChildItem $DestinationFolder\*.csv | ForEach-Object {$_.Name}   #Selects the files
+    foreach ($file in Get-ChildItem $DestinationFolder\*.csv)    #Selects the files
     {
         (Get-Content $file) -replace '"','' | Set-Content $file    #Replaces quotes with a blank space
     }
