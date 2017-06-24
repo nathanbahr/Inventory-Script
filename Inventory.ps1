@@ -534,7 +534,7 @@
                 'Serial Number' = $bios.SerialNumber;
                 'Manufacturer' = $system.Manufacturer;
                 'Model Number' = $system.Model;
-                'DHCP' = $network.DHCPEnabled | Select-Object -First 1;
+                'DHCP' = $network.DHCPEnabled[0];
                 'IP Address' = $FirstIP;
                 'Subnet Mask' = $FirstSub;
                 'Second IP' = $SecondIP;
