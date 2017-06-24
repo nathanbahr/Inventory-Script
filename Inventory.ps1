@@ -545,7 +545,32 @@
                             }
                         Write-Output "$($date),$($user),,,,$($DateReadable),$($ComputerName),Laptop,$($system.Model),,$($bios.SerialNumber),$($os.Caption -replace 'Microsoft ',''),$($memory) GB,$($CDriveModel),$($TeamViewer.ClientID),$($GoogleDrive)" >> $DestinationFolder\IronRidge.csv
                   }
-
+    <#IronRidge#> If ($DestinationFolder -like "*testy*") {
+                    $Testy = [PSCustomObject]@{
+                        'Timestamp' = $date;
+                        'User Name' = $user;
+                        'Employees' = $user;
+                        'Active' = '';
+                        'Tag' = '';
+                        'Date Checked' = $DateReadable;
+                        'Hostname'= $ComputerName;
+                        'IP Address' = $FirstIP;
+                        'Asset' = 'Laptop';
+                        'Model Name' = $system.Model;
+                        'Category' = '';
+                        'Serial Number' = $bios.SerialNumber;
+                        'OS' = $os.Caption -replace 'Microsoft ','';
+                        'Memory' = "$memory GB";
+                        'Storage' = $CDriveModel;
+                        'TeamViewer' = $TeamViewer.ClientID;
+                        'Google Drive' = $GoogleDrive;
+                        'Special Programs' = ''
+                        'Location' = ''
+                        'Encrypted' = 'No'
+                    }
+                    Write-Output $Testy
+                    $Testy | Export-Csv -Path $DestinationFolder\Testy.csv -Append
+                }
 #Makes three text files with detailed information about computer.
     Write-Output $ipconfig $netAdapter $route $Firewall $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedNetwork.txt
     Write-Output $ComputerName $user $system $CPU $bios $NetUser $AdminUsers $VidDriver <#$Printer#> <#$PrinterDriver#> $DiskDrives $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
