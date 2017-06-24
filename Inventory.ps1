@@ -538,15 +538,8 @@
                     Write-Output "$($ComputerName),$($date),$($FirstIP),<#Description#>,$($user),$($AdminPrivileges),$($system.Model),$($bios.SerialNumber),<#Patch Port#>,<#Extension/Switch>,<#Location#>," >> $DestinationFolder\Library.csv
                 }
 
-    <#IronRidge#> If ($DestinationFolder -like "*\IronRidge\*") {
-                        $TestVersion = Test-Path $DestinationFolder\IronRidge.csv
-                            if ($TestVersion -like 'False') {
-                                Write-Output 'Timestamp,User Name,Employees,Active,Tag,Date Checked,Hostname,Asset,Model Name,Category,Serial Number,OS,Memory,Storage,TeamViewer,Google Drive,Special Programs,Location,Encrypted' >> $DestinationFolder\IronRidge.csv
-                            }
-                        Write-Output "$($date),$($user),,,,$($DateReadable),$($ComputerName),Laptop,$($system.Model),,$($bios.SerialNumber),$($os.Caption -replace 'Microsoft ',''),$($memory) GB,$($CDriveModel),$($TeamViewer.ClientID),$($GoogleDrive)" >> $DestinationFolder\IronRidge.csv
-                  }
-    <#IronRidge#> If ($DestinationFolder -like "*testy*") {
-                    $Testy = [PSCustomObject]@{
+    <#IronRidge#> If ($DestinationFolder -like "*IronRidge*") {
+                    $IronRidge = [PSCustomObject]@{
                         'Timestamp' = $date;
                         'User Name' = $user;
                         'Employees' = $user;
@@ -568,8 +561,8 @@
                         'Location' = ''
                         'Encrypted' = 'No'
                     }
-                    Write-Output $Testy
-                    $Testy | Export-Csv -Path $DestinationFolder\Testy.csv -Append
+                    Write-Output $IronRidge
+                    $IronRidge | Export-Csv -Path $DestinationFolder\IronRidge.csv -Append
                 }
 #Makes three text files with detailed information about computer.
     Write-Output $ipconfig $netAdapter $route $Firewall $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedNetwork.txt
