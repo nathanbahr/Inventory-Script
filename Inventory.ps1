@@ -526,60 +526,127 @@
         }
 
 #Output
-    <#Full#> $TestInventoryFull = Test-Path $DestinationFolder\InventoryFull.csv    #Creates the files used to store the retrieved data if they do not exist.
-                if ($TestInventoryFull -like "False")
-                {
-                    #Makes the CSV file.
-                    Write-Output 'ID,Hostname,Timestamp,Serial Number,Manufacturer,Model Number,DHCP,IP Address,Subnet Mask,Second IP,Second Subnet,Default Gateway,Primary DNS,Backup DNS,Primary WINS,Backup WINS,Domain,MAC Address,Network Adapter,Adapter Type,CPU Name,Physical Cores,Logical Cores,Max Frequency,Memory,Free Memory,Pct Used,System Type,Username,Admin Privileges,TeamViewer,AMD GPU,NVIDIA GPU,Intel GPU,Googele Drive,Primary Drive Model,Capacity,Used,Free,Percent Used,Windows Key,OS Name,OS Number,OS Build,SMBIOS,BIOS Version,BIOS Date/Name,Internet Explorer,Firefox 32-bit,Firefox 64-bit,Chrome,Flash,Flash NPAPI,Flash PPAPI,Java,Adobe Reader,PowerShell,AMD Driver,NVIDIA Driver,Intel Driver,McAfee,IP1,IP2,IP3,IP4' >> $DestinationFolder\InventoryFull.csv
-                }
-        Write-Output "$($id),$($ComputerName),$($date),$($bios.SerialNumber),$($system.Manufacturer),$($system.Model),$($network.DHCPEnabled | select -First 1),$($FirstIP),$($FirstSub),$($SecondIP),$($SecondSub),$($network.DefaultIPGateway),$($DNS),$($DNSBackup),$($WINS),$($WINSBackup),$($system.Domain),$($network.MACAddress),$($network.Description),$($netAdapter),$($CPU.Name),$($CPU.NumberOfCores),$($CPU.NumberOfLogicalProcessors),$($MaxGHz),$($memory) GB,$($FreeMemory) GB,$($FreeMemoryPercent) %,$($system.SystemType),$($user),$($AdminPrivileges),$($TeamViewer.ClientID),$($AMDVidDriverName.Name),$($NVIDIAVidDriverName.Name),$($IntelVidDriverName.Name),$($GoogleDrive),$($CDriveModel),$($CDriveCapacity) GB,$($CDriveUsed) GB,$($CDriveFree) GB,$($CDrivePercentUsed),$($ProductKey),$($os.Caption -replace 'Microsoft ',''),$($SoftwareLicensing.version<#$os.Version#>),$($os.BuildNumber),$($bios.SMBIOSBIOSVersion),$($bios.Version),$($bios.Name),$($IE.svcVersion),$($Firefox.DisplayVersion),$($Firefox64.DisplayVersion),$($Chrome.Version),$($Flash),$($FlashNPAPI.Version),$($FlashPPAPI.Version),$($Java.DisplayVersion),$($Reader.DisplayVersion),$($PSVersionTable.PSVersion),$($AMDVidDriverVersion.DriverVersion),$($NVIDIAVidDriverVersion.DriverVersion),$($IntelVidDriverVersion.DriverVersion),$($McAfeeAgent),$($oct0),$($oct1),$($oct2),$($oct3)" >> $DestinationFolder\InventoryFull.csv
+    <#Full#>
+            $InventoryFull = [PSCustomObject]@{
+                'ID' = $id;
+                'Hostname' = $ComputerName;
+                'Timestamp' = $date;
+                'Serial Number' = $bios.SerialNumber;
+                'Manufacturer' = $system.Manufacturer;
+                'Model Number' = $system.Model;
+                'DHCP' = $network.DHCPEnabled | Select-Object -First 1;
+                'IP Address' = $FirstIP;
+                'Subnet Mask' = $FirstSub;
+                'Second IP' = $SecondIP;
+                'Second Subnet' = $SecondSub;
+                'Default Gateway' = $network.DefaultIPGateway[0];
+                'Primary DNS' = $DNS;
+                'Backup DNS' = $DNSBackup;
+                'Primary WINS' = $WINS;
+                'Backup WINS' = $WINSBackup;
+                'Domain' = $system.Domain;
+                'MAC Address' = $network.MACAddress;
+                'Network Adapter' = $network.Description;
+                'Adapter Type' = $netAdapter;
+                'CPU Name' = $CPU.Name;
+                'Physical Cores' = $CPU.NumberOfCores;
+                'Logical Cores' = $CPU.NumberOfLogicalProcessors;
+                'Max Frequency' = $MaxGHz;
+                'Memory' = "$memory GB";
+                'Free Memory' = "$FreeMemory GB";
+                'Pct Used' = "$FreeMemoryPercent %";    
+                'System Type' = $system.SystemType
+                'Username' = $user;
+                'Admin Privileges' = $AdminPrivileges;
+                'TeamViewer' = $TeamViewer.ClientID;
+                'AMD GPU' = $AMDVidDriverName.Name;
+                'NVIDIA GPU' = $NVIDIAVidDriverName.Name;
+                'Intel GPU' = $IntelVidDriverName.Name;
+                'Googele Drive' = $GoogleDrive;
+                'Primary Drive Model' = $CDriveModel;
+                'Capacity' = "$CDriveCapacity GB";
+                'Used' = "$CDriveUsed GB";
+                'Free' = "$CDriveFree GB";
+                'Percent Used' = $CDrivePercentUsed;
+                'Windows Key' = $ProductKey;
+                'OS Name' = $os.Caption -replace 'Microsoft ','';
+                'OS Number' = $SoftwareLicensing.version;
+                'OS Build' = $os.BuildNumber;
+                'SMBIOS' = $bios.SMBIOSBIOSVersion;
+                'BIOS Version' = $bios.Version;
+                'BIOS Date/Name' = $bios.Name;
+                'Internet Explorer' = $IE.svcVersion;
+                'Firefox 32-bit' = $Firefox.DisplayVersion;
+                'Firefox 64-bit' = $Firefox64.DisplayVersion;
+                'Chrome' = $Chrome.Version;
+                'Flash' = $Flash;
+                'Flash NPAPI' = $FlashNPAPI.Version;
+                'Flash PPAPI' = $FlashPPAPI.Version;
+                'Java' = $Java.DisplayVersion;
+                'Adobe Reader' = $Reader.DisplayVersion;
+                'PowerShell' = $PSVersionTable.PSVersion;
+                'AMD Driver' = $AMDVidDriverVersion.DriverVersion;
+                'NVIDIA Driver' = $NVIDIAVidDriverVersion.DriverVersion;
+                'Intel Driver' = $IntelVidDriverVersion.DriverVersion;
+                'McAfee' = $McAfeeAgent;
+                'IP1' = $oct0;
+                'IP2' = $oct1;
+                'IP3' = $oct2;
+                'IP4' = $oct3;
+            }
+            Write-Output $InventoryFull
+            $InventoryFull | Export-Csv -Path $DestinationFolder\InventoryFull.csv -Append                
 
-<#Library#>     If ($DestinationFolder -like "*Library*") 
-                {                
-                    $Library = [PSCustomObject]@{
-                            'Hostname' = $ComputerName;
-                            'Timestamp' = $date;
-                            'IP Address' = $FirstIP;
-                            'Description' = '';
-                            'User Name' = $user;
-                            'Admin Privileges' = $AdminPrivileges;
-                            'Model Name' = $system.Model;
-                            'Serial Number' = $bios.SerialNumber;
-                            'Patch Ports' = '';
-                            'Extension/Switch' = '';
-                            'Location' = '';
-                    }
-                    Write-Output $Library
-                    $Library | Export-Csv -Path $DestinationFolder\Library.csv -Append
-                }
-<#IronRidge#>   If ($DestinationFolder -like "*IronRidge*") 
-                {
-                    $IronRidge = [PSCustomObject]@{
-                        'Timestamp' = $date;
-                        'User Name' = $user;
-                        'Employees' = $user;
-                        'Active' = '';
-                        'Tag' = '';
-                        'Date Checked' = $DateReadable;
-                        'Hostname'= $ComputerName;
-                        'IP Address' = $FirstIP;
-                        'Asset' = 'Laptop';
-                        'Model Name' = $system.Model;
-                        'Category' = '';
-                        'Serial Number' = $bios.SerialNumber;
-                        'OS' = $os.Caption -replace 'Microsoft ','';
-                        'Memory' = "$memory GB";
-                        'Storage' = $CDriveModel;
-                        'TeamViewer' = $TeamViewer.ClientID;
-                        'Google Drive' = $GoogleDrive;
-                        'Special Programs' = ''
-                        'Location' = ''
-                        'Encrypted' = 'No'
-                    }
-                    Write-Output $IronRidge
-                    $IronRidge | Export-Csv -Path $DestinationFolder\IronRidge.csv -Append
-                }
-#Makes three text files with detailed information about computer.
+    <#Library#>     
+        If ($DestinationFolder -like "*Library*") 
+        {                
+            $Library = [PSCustomObject]@{
+                'Hostname' = $ComputerName;
+                'Timestamp' = $date;
+                'IP Address' = $FirstIP;
+                'Description' = '';
+                'User Name' = $user;
+                'Admin Privileges' = $AdminPrivileges;
+                'Model Name' = $system.Model;
+                'Serial Number' = $bios.SerialNumber;
+                'Patch Ports' = '';
+                'Extension/Switch' = '';
+                'Location' = '';
+        }
+            Write-Output $Library
+            $Library | Export-Csv -Path $DestinationFolder\Library.csv -Append
+        }
+
+    <#IronRidge#>   
+        If ($DestinationFolder -like "*IronRidge*") 
+        {
+            $IronRidge = [PSCustomObject]@{
+                'Timestamp' = $date;
+                'User Name' = $user;
+                'Employees' = $user;
+                'Active' = '';
+                'Tag' = '';
+                'Date Checked' = $DateReadable;
+                'Hostname'= $ComputerName;
+                'IP Address' = $FirstIP;
+                'Asset' = 'Laptop';
+                'Model Name' = $system.Model;
+                'Category' = '';
+                'Serial Number' = $bios.SerialNumber;
+                'OS' = $os.Caption -replace 'Microsoft ','';
+                'Memory' = "$memory GB";
+                'Storage' = $CDriveModel;
+                'TeamViewer' = $TeamViewer.ClientID;
+                'Google Drive' = $GoogleDrive;
+                'Special Programs' = ''
+                'Location' = ''
+                'Encrypted' = 'No'
+            }
+            Write-Output $IronRidge
+            $IronRidge | Export-Csv -Path $DestinationFolder\IronRidge.csv -Append
+        }
+
+#Makes text files with detailed information about computer.
     Write-Output $ipconfig $netAdapter $route $Firewall $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedNetwork.txt
     Write-Output $ComputerName $user $system $CPU $bios $NetUser $AdminUsers $VidDriver <#$Printer#> <#$PrinterDriver#> $DiskDrives $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
     Get-WmiObject SoftwareLicensingService >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
