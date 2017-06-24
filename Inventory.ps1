@@ -9,7 +9,7 @@
     $Timestamp = Get-Date -Format o | ForEach-Object {$_ -replace ":", "."}
 
 #Destination Folder
-    $DestinationFolder = '.\Computers\Testy'
+    $DestinationFolder = '.\Computers\Library'
     $DestinationFolderPath = Test-Path $DestinationFolder
         If ($DestinationFolderPath -eq 'True') 
         {
@@ -601,17 +601,20 @@
         If ($DestinationFolder -like "*Library*") 
         {                
             $Library = [PSCustomObject]@{
-                'Hostname' = $ComputerName;
                 'Timestamp' = $date;
-                'IP Address' = $FirstIP;
+                'Hostname' = $ComputerName;
                 'Description' = '';
                 'User Name' = $user;
+                'IP Address' = $FirstIP;
                 'Admin Privileges' = $AdminPrivileges;
                 'Model Name' = $system.Model;
                 'Serial Number' = $bios.SerialNumber;
-                'Patch Ports' = '';
+                'Patch Port' = '';
+                'Switchport' = '';
                 'Extension/Switch' = '';
                 'Location' = '';
+                'Type' = '';
+                'Password' = '';
         }
             Write-Output $Library
             $Library | Export-Csv -Path $DestinationFolder\Library.csv -Append
