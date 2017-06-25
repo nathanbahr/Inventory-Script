@@ -467,7 +467,7 @@
 #Video Driver
     $VidDriver = Get-WmiObject win32_VideoController
 
-        $AMDVidDriver = $VidDriver | Where-Object {$_.Name -Like "*AMD*" -or "*Radeon*"}
+        $AMDVidDriver = $VidDriver | Where {$_.Name -like "*AMD*" -or $_.Name -like "*Radeon*"}
         If ([string]::IsNullOrEmpty($AMDVidDriver))    #Sees if an AMD GPU is instlled
         {
             $AMDVidDriver = 'NULL'    #If not, mark as empty
