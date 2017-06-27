@@ -640,6 +640,7 @@
                 'Storage' = $CDriveModel;
                 'TeamViewer' = $TeamViewer.ClientID;
                 'Google Drive' = $GoogleDrive;
+                'Date Deployed' = ''
                 'Special Programs' = ''
                 'Location' = ''
                 'Encrypted' = 'No'
