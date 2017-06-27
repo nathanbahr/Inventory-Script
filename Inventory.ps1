@@ -9,7 +9,7 @@
     $Timestamp = Get-Date -Format o | ForEach-Object {$_ -replace ":", "."}
 
 #Destination Folder
-    $DestinationFolder = '.\Computers\Library'
+    $DestinationFolder = '.\Computers\IronRidge'
     $DestinationFolderPath = Test-Path $DestinationFolder
         If ($DestinationFolderPath -eq 'True') 
         {
@@ -631,7 +631,6 @@
                 'Tag' = '';
                 'Date Checked' = $DateReadable;
                 'Hostname'= $ComputerName;
-                'IP Address' = $FirstIP;
                 'Asset' = 'Laptop';
                 'Model Name' = $system.Model;
                 'Category' = '';
