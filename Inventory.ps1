@@ -464,9 +464,20 @@
         <#Get-Volume -DriveLetter C | select @{L="PercentUsed";E={($_.sizeremaining/$_.size).ToString("P")}}#>
         <#https://blogs.technet.microsoft.com/heyscriptingguy/2014/10/11/weekend-scripter-use-powershell-to-calculate-and-display-percentages/#>
 
-
 #BitLocker
-    #
+    $FixedDrives = Get-Volume | Where {$_.DriveType -eq "Fixed"}
+        If ($FixedDrives.driveletter -eq "D") {
+            $DBitLocker = Get-BitLockerVolume -MountPoint D:
+            $DBLVolumeStatus = $DBitLocker.VolumeStatus
+            $DBLProtectionStatus = $DBitLocker.ProtectionStatus
+            $DBLEncryptionPercentage = $DBitLocker.EncryptionPercentage
+        }
+
+    $CBitLocker = Get-BitLockerVolume -MountPoint C:
+    $CBLVolumeStatus = $CBitLocker.VolumeStatus
+    $CBLProtectionStatus = $CBitLocker.ProtectionStatus
+    $CBLEncryptionPercentage = $CBitLocker.EncryptionPercentage
+        
 
 #Video Driver
     $VidDriver = Get-WmiObject win32_VideoController
@@ -572,6 +583,14 @@
                 'Used' = "$CDriveUsed GB";
                 'Free' = "$CDriveFree GB";
                 'Percent Used' = $CDrivePercentUsed;
+                'C BitLocker Volume' = $CBLVolumeStatus;
+                'C BitLocker Protection' = $CDBLProtectionStatus;
+                'C BitLocker Percentage' = $CBLEncryptionPercentage;
+                'D BitLocker Volume' = $DBLVolumeStatus;
+                'D BitLocker Protection' = $DDBLProtectionStatus;
+                'D BitLocker Percentage' = $DBLEncryptionPercentage;
+                'ID' = '';
+                'Key' = '';
                 'Windows Key' = $ProductKey;
                 'OS Name' = $os.Caption -replace 'Microsoft ','';
                 'OS Number' = $SoftwareLicensing.version;
@@ -646,7 +665,8 @@
                 'Google Drive' = $GoogleDrive;
                 'Special Programs' = ''
                 'Location' = ''
-                'Encrypted' = 'No'
+                'C Encrypted' = $CBLVolumeStatus;
+                'D Encrypted' = $CBLVolumeStatus;
             }
             Write-Output $IronRidge
             $IronRidge | Export-Csv -Path $DestinationFolder\IronRidge.csv -Append
