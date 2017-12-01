@@ -1,4 +1,5 @@
 ﻿    $System = Get-WmiObject Win32_ComputerSystem
+    $ComputerName = hostname
     $SoftwareLicensing = Get-WmiObject SoftwareLicensingService
 
 
@@ -20,17 +21,16 @@
             mkdir "$($DestinationFolder)"
         }
 
-#Details Folder
-    $ComputerName = hostname
-    $dirDetail = Test-Path "$DestinationFolder\details\$ComputerName"
-        If ($dirDetail -eq "True")
-        {
-            Write-Verbose "Writing to: $DestinationFolder\details\$ComputerName" -Verbose
-        } 
-        Else 
-        {
-            mkdir $DestinationFolder\details\$ComputerName
-        }
+# #Details Folder
+#     $dirDetail = Test-Path "$DestinationFolder\details\$ComputerName"
+#         If ($dirDetail -eq "True")
+#         {
+#             Write-Verbose "Writing to: $DestinationFolder\details\$ComputerName" -Verbose
+#         } 
+#         Else 
+#         {
+#             mkdir $DestinationFolder\details\$ComputerName
+#         }
 
 #ID
     $ipID = ipconfig | Where-Object {$_ -match "IPv4 Address"} | ForEach-Object{$_.Split(":")[1]}
@@ -464,6 +464,10 @@
         <#Get-Volume -DriveLetter C | select @{L="PercentUsed";E={($_.sizeremaining/$_.size).ToString("P")}}#>
         <#https://blogs.technet.microsoft.com/heyscriptingguy/2014/10/11/weekend-scripter-use-powershell-to-calculate-and-display-percentages/#>
 
+
+#BitLocker
+    #
+
 #Video Driver
     $VidDriver = Get-WmiObject win32_VideoController
 
@@ -648,21 +652,21 @@
             $IronRidge | Export-Csv -Path $DestinationFolder\IronRidge.csv -Append
         }
 
-#Makes text files with detailed information about computer.
-    Write-Output $ipconfig $netAdapter $route $Firewall $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedNetwork.txt
-    Write-Output $ComputerName $user $system $CPU $bios $NetUser $AdminUsers $VidDriver <#$Printer#> <#$PrinterDriver#> $DiskDrives $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
-    Get-WmiObject SoftwareLicensingService >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
-        if ($os.Version -gt "6.1.7601")
-        {
-            Get-Volume >> $DestinationFolder\details\$ComputerName\$Timestamp-Drives.txt
-            Get-Printer >> $DestinationFolder\details\$ComputerName\$Timestamp-Printers.txt
-        }
-    Write-Output $ComputerName $os $bios $IE $firefox $Chrome $Flash $Java $PSVersionTable $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedVersion.txt   
-	    Get-childitem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\' | Export-Clixml "$DestinationFolder\details\$ComputerName\$Timestamp-applications.xml"    #lists all installed 32-bit programs in a XML file
-	    if ($System.SystemType -eq "X64-based PC")    #only for 64-bit computers
-        {
-            Get-childitem 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' | Export-Clixml "$DestinationFolder\details\$ComputerName\$Timestamp-applications64.xml"    #lists all installed 64-bit programs in a XML file
-        }
+# #Makes text files with detailed information about computer.
+#     Write-Output $ipconfig $netAdapter $route $Firewall $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedNetwork.txt
+#     Write-Output $ComputerName $user $system $CPU $bios $NetUser $AdminUsers $VidDriver <#$Printer#> <#$PrinterDriver#> $DiskDrives $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
+#     Get-WmiObject SoftwareLicensingService >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
+#         if ($os.Version -gt "6.1.7601")
+#         {
+#             Get-Volume >> $DestinationFolder\details\$ComputerName\$Timestamp-Drives.txt
+#             Get-Printer >> $DestinationFolder\details\$ComputerName\$Timestamp-Printers.txt
+#         }
+#     Write-Output $ComputerName $os $bios $IE $firefox $Chrome $Flash $Java $PSVersionTable $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedVersion.txt   
+# 	    Get-childitem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\' | Export-Clixml "$DestinationFolder\details\$ComputerName\$Timestamp-applications.xml"    #lists all installed 32-bit programs in a XML file
+# 	    if ($System.SystemType -eq "X64-based PC")    #only for 64-bit computers
+#         {
+#             Get-childitem 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' | Export-Clixml "$DestinationFolder\details\$ComputerName\$Timestamp-applications64.xml"    #lists all installed 64-bit programs in a XML file
+#         }
 
 # remove quotes
     foreach ($file in Get-ChildItem $DestinationFolder\*.csv)    #Selects the files
@@ -670,10 +674,10 @@
         (Get-Content $file) -replace '"','' | Set-Content $file    #Replaces quotes with a blank space
     }
 
-#Errors
-    $LogFile = "$DestinationFolder\details\log.txt"
-        Get-Date | Out-File $LogFile -Append
-        $ComputerName | Out-File $LogFile -Append
-        #$Error | Out-File $LogFile -Append
-        $erFlash | Out-File $LogFile -Append
-        $erJava | Out-File $LogFile -Append
+# #Errors
+#     $LogFile = "$DestinationFolder\details\log.txt"
+#         Get-Date | Out-File $LogFile -Append
+#         $ComputerName | Out-File $LogFile -Append
+#         #$Error | Out-File $LogFile -Append
+#         $erFlash | Out-File $LogFile -Append
+#         $erJava | Out-File $LogFile -Append
