@@ -1,4 +1,11 @@
-﻿    $System = Get-WmiObject Win32_ComputerSystem
+﻿function Get-Inventory {
+    [CmdletBinding()]
+    param (
+    [PSDefaultValue(Help = 'Current directory')]
+    $DestinationFolder = '.\Computers'
+    )
+
+    $System = Get-WmiObject Win32_ComputerSystem
     $ComputerName = hostname
     $SoftwareLicensing = Get-WmiObject SoftwareLicensingService
 
@@ -9,28 +16,7 @@
     $DateReadable = Get-Date -Format g
     $Timestamp = Get-Date -Format o | ForEach-Object {$_ -replace ":", "."}
 
-#Destination Folder
-    $DestinationFolder = '.\Computers\IronRidge'
-    $DestinationFolderPath = Test-Path $DestinationFolder
-        If ($DestinationFolderPath -eq 'True') 
-        {
-            Write-Verbose "Using existing folder: $($DestinationFolder)" -Verbose
-        } 
-        Else 
-        {
-            mkdir "$($DestinationFolder)"
-        }
 
-# #Details Folder
-#     $dirDetail = Test-Path "$DestinationFolder\details\$ComputerName"
-#         If ($dirDetail -eq "True")
-#         {
-#             Write-Verbose "Writing to: $DestinationFolder\details\$ComputerName" -Verbose
-#         } 
-#         Else 
-#         {
-#             mkdir $DestinationFolder\details\$ComputerName
-#         }
 
 #ID
     $ipID = ipconfig | Where-Object {$_ -match "IPv4 Address"} | ForEach-Object{$_.Split(":")[1]}
@@ -540,8 +526,31 @@
             Write-Output "Current user does not have administrator privileges."
         }
 
+#Destination Folder
+    
+    $DestinationFolderPath = Test-Path $DestinationFolder
+        If ($DestinationFolderPath -eq 'True') 
+        {
+            Write-Verbose "Using existing folder: $($DestinationFolder)" -Verbose
+        } 
+        Else 
+        {
+            mkdir "$($DestinationFolder)"
+        }
+
+# #Details Folder
+#     $dirDetail = Test-Path "$DestinationFolder\details\$ComputerName"
+#         If ($dirDetail -eq "True")
+#         {
+#             Write-Verbose "Writing to: $DestinationFolder\details\$ComputerName" -Verbose
+#         } 
+#         Else 
+#         {
+#             mkdir $DestinationFolder\details\$ComputerName
+#         }
+
 #Output
-    <#Full#>
+    #Full
             $InventoryFull = [PSCustomObject]@{
                 'ID' = $id;
                 'Hostname' = $ComputerName;
@@ -589,8 +598,8 @@
                 'D BitLocker Volume' = $DBLVolumeStatus;
                 'D BitLocker Protection' = $DDBLProtectionStatus;
                 'D BitLocker Percentage' = $DBLEncryptionPercentage;
-                'ID' = '';
-                'Key' = '';
+                'BL ID' = '';
+                'BL Key' = '';
                 'Windows Key' = $ProductKey;
                 'OS Name' = $os.Caption -replace 'Microsoft ','';
                 'OS Number' = $SoftwareLicensing.version;
@@ -701,3 +710,5 @@
 #         #$Error | Out-File $LogFile -Append
 #         $erFlash | Out-File $LogFile -Append
 #         $erJava | Out-File $LogFile -Append
+
+}
