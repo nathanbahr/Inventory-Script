@@ -627,7 +627,7 @@
                 'Timestamp' = $date;
                 'User Name' = $user;
                 'Employees' = $user;
-                'Active' = '';
+                'Status' = '';
                 'Tag' = '';
                 'Date Checked' = $DateReadable;
                 'Hostname'= $ComputerName;
@@ -637,7 +637,7 @@
                 'Serial Number' = $bios.SerialNumber;
                 'OS' = $os.Caption -replace 'Microsoft ','';
                 'Memory' = "$memory GB";
-                'Storage' = $CDriveModel;
+                'Storage' = "$CDriveCapacity GB";
                 'TeamViewer' = $TeamViewer.ClientID;
                 'Google Drive' = $GoogleDrive;
                 'Date Deployed' = ''
