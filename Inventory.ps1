@@ -713,3 +713,4 @@
 #         $erJava | Out-File $LogFile -Append
 
 }
+Get-Inventory -DestinationFolder "E:\Inventory-Script\Computers\IronRidge"
