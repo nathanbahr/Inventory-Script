@@ -1,4 +1,12 @@
-﻿    $System = Get-WmiObject Win32_ComputerSystem
+﻿function Get-Inventory {
+    [CmdletBinding()]
+    param (
+    [PSDefaultValue(Help = 'Current directory')]
+    $DestinationFolder = '.\Computers'
+    )
+
+    $System = Get-WmiObject Win32_ComputerSystem
+    $ComputerName = hostname
     $SoftwareLicensing = Get-WmiObject SoftwareLicensingService
 
 
@@ -8,29 +16,7 @@
     $DateReadable = Get-Date -Format g
     $Timestamp = Get-Date -Format o | ForEach-Object {$_ -replace ":", "."}
 
-#Destination Folder
-    $DestinationFolder = '.\Computers\IronRidge'
-    $DestinationFolderPath = Test-Path $DestinationFolder
-        If ($DestinationFolderPath -eq 'True') 
-        {
-            Write-Verbose "Using existing folder: $($DestinationFolder)" -Verbose
-        } 
-        Else 
-        {
-            mkdir "$($DestinationFolder)"
-        }
 
-#Details Folder
-    $ComputerName = hostname
-    $dirDetail = Test-Path "$DestinationFolder\details\$ComputerName"
-        If ($dirDetail -eq "True")
-        {
-            Write-Verbose "Writing to: $DestinationFolder\details\$ComputerName" -Verbose
-        } 
-        Else 
-        {
-            mkdir $DestinationFolder\details\$ComputerName
-        }
 
 #ID
     $ipID = ipconfig | Where-Object {$_ -match "IPv4 Address"} | ForEach-Object{$_.Split(":")[1]}
@@ -464,6 +450,21 @@
         <#Get-Volume -DriveLetter C | select @{L="PercentUsed";E={($_.sizeremaining/$_.size).ToString("P")}}#>
         <#https://blogs.technet.microsoft.com/heyscriptingguy/2014/10/11/weekend-scripter-use-powershell-to-calculate-and-display-percentages/#>
 
+#BitLocker
+    $FixedDrives = Get-Volume | Where {$_.DriveType -eq "Fixed"}
+        If ($FixedDrives.driveletter -eq "D") {
+            $DBitLocker = Get-BitLockerVolume -MountPoint D:
+            $DBLVolumeStatus = $DBitLocker.VolumeStatus
+            $DBLProtectionStatus = $DBitLocker.ProtectionStatus
+            $DBLEncryptionPercentage = $DBitLocker.EncryptionPercentage
+        }
+
+    $CBitLocker = Get-BitLockerVolume -MountPoint C:
+    $CBLVolumeStatus = $CBitLocker.VolumeStatus
+    $CBLProtectionStatus = $CBitLocker.ProtectionStatus
+    $CBLEncryptionPercentage = $CBitLocker.EncryptionPercentage
+        
+
 #Video Driver
     $VidDriver = Get-WmiObject win32_VideoController
 
@@ -525,8 +526,31 @@
             Write-Output "Current user does not have administrator privileges."
         }
 
+#Destination Folder
+    
+    $DestinationFolderPath = Test-Path $DestinationFolder
+        If ($DestinationFolderPath -eq 'True') 
+        {
+            Write-Verbose "Using existing folder: $($DestinationFolder)" -Verbose
+        } 
+        Else 
+        {
+            mkdir "$($DestinationFolder)"
+        }
+
+# #Details Folder
+#     $dirDetail = Test-Path "$DestinationFolder\details\$ComputerName"
+#         If ($dirDetail -eq "True")
+#         {
+#             Write-Verbose "Writing to: $DestinationFolder\details\$ComputerName" -Verbose
+#         } 
+#         Else 
+#         {
+#             mkdir $DestinationFolder\details\$ComputerName
+#         }
+
 #Output
-    <#Full#>
+    #Full
             $InventoryFull = [PSCustomObject]@{
                 'ID' = $id;
                 'Hostname' = $ComputerName;
@@ -568,6 +592,14 @@
                 'Used' = "$CDriveUsed GB";
                 'Free' = "$CDriveFree GB";
                 'Percent Used' = $CDrivePercentUsed;
+                'C BitLocker Volume' = $CBLVolumeStatus;
+                'C BitLocker Protection' = $CDBLProtectionStatus;
+                'C BitLocker Percentage' = $CBLEncryptionPercentage;
+                'D BitLocker Volume' = $DBLVolumeStatus;
+                'D BitLocker Protection' = $DDBLProtectionStatus;
+                'D BitLocker Percentage' = $DBLEncryptionPercentage;
+                'BL ID' = '';
+                'BL Key' = '';
                 'Windows Key' = $ProductKey;
                 'OS Name' = $os.Caption -replace 'Microsoft ','';
                 'OS Number' = $SoftwareLicensing.version;
@@ -643,27 +675,28 @@
                 'Date Deployed' = ''
                 'Special Programs' = ''
                 'Location' = ''
-                'Encrypted' = 'No'
+                'C Encrypted' = $CBLVolumeStatus;
+                'D Encrypted' = $CBLVolumeStatus;
             }
             Write-Output $IronRidge
             $IronRidge | Export-Csv -Path $DestinationFolder\IronRidge.csv -Append
         }
 
-#Makes text files with detailed information about computer.
-    Write-Output $ipconfig $netAdapter $route $Firewall $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedNetwork.txt
-    Write-Output $ComputerName $user $system $CPU $bios $NetUser $AdminUsers $VidDriver <#$Printer#> <#$PrinterDriver#> $DiskDrives $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
-    Get-WmiObject SoftwareLicensingService >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
-        if ($os.Version -gt "6.1.7601")
-        {
-            Get-Volume >> $DestinationFolder\details\$ComputerName\$Timestamp-Drives.txt
-            Get-Printer >> $DestinationFolder\details\$ComputerName\$Timestamp-Printers.txt
-        }
-    Write-Output $ComputerName $os $bios $IE $firefox $Chrome $Flash $Java $PSVersionTable $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedVersion.txt   
-	    Get-childitem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\' | Export-Clixml "$DestinationFolder\details\$ComputerName\$Timestamp-applications.xml"    #lists all installed 32-bit programs in a XML file
-	    if ($System.SystemType -eq "X64-based PC")    #only for 64-bit computers
-        {
-            Get-childitem 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' | Export-Clixml "$DestinationFolder\details\$ComputerName\$Timestamp-applications64.xml"    #lists all installed 64-bit programs in a XML file
-        }
+# #Makes text files with detailed information about computer.
+#     Write-Output $ipconfig $netAdapter $route $Firewall $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedNetwork.txt
+#     Write-Output $ComputerName $user $system $CPU $bios $NetUser $AdminUsers $VidDriver <#$Printer#> <#$PrinterDriver#> $DiskDrives $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
+#     Get-WmiObject SoftwareLicensingService >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
+#         if ($os.Version -gt "6.1.7601")
+#         {
+#             Get-Volume >> $DestinationFolder\details\$ComputerName\$Timestamp-Drives.txt
+#             Get-Printer >> $DestinationFolder\details\$ComputerName\$Timestamp-Printers.txt
+#         }
+#     Write-Output $ComputerName $os $bios $IE $firefox $Chrome $Flash $Java $PSVersionTable $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedVersion.txt   
+# 	    Get-childitem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\' | Export-Clixml "$DestinationFolder\details\$ComputerName\$Timestamp-applications.xml"    #lists all installed 32-bit programs in a XML file
+# 	    if ($System.SystemType -eq "X64-based PC")    #only for 64-bit computers
+#         {
+#             Get-childitem 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' | Export-Clixml "$DestinationFolder\details\$ComputerName\$Timestamp-applications64.xml"    #lists all installed 64-bit programs in a XML file
+#         }
 
 # remove quotes
     foreach ($file in Get-ChildItem $DestinationFolder\*.csv)    #Selects the files
@@ -671,10 +704,12 @@
         (Get-Content $file) -replace '"','' | Set-Content $file    #Replaces quotes with a blank space
     }
 
-#Errors
-    $LogFile = "$DestinationFolder\details\log.txt"
-        Get-Date | Out-File $LogFile -Append
-        $ComputerName | Out-File $LogFile -Append
-        #$Error | Out-File $LogFile -Append
-        $erFlash | Out-File $LogFile -Append
-        $erJava | Out-File $LogFile -Append
+# #Errors
+#     $LogFile = "$DestinationFolder\details\log.txt"
+#         Get-Date | Out-File $LogFile -Append
+#         $ComputerName | Out-File $LogFile -Append
+#         #$Error | Out-File $LogFile -Append
+#         $erFlash | Out-File $LogFile -Append
+#         $erJava | Out-File $LogFile -Append
+
+}
