@@ -713,4 +713,5 @@
 #         $erJava | Out-File $LogFile -Append
 
 }
-Get-Inventory -DestinationFolder "E:\Inventory-Script\Computers\IronRidge"
+$SurvivorDriveLetter = (Get-Volume -FriendlyName SURVIVOR).DriveLetter
+Get-Inventory -DestinationFolder "$SurvivorDriveLetter:\Inventory-Script\Computers\IronRidge"
