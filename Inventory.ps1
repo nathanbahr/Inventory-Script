@@ -714,4 +714,4 @@
 
 }
 $SurvivorDriveLetter = (Get-Volume -FriendlyName SURVIVOR).DriveLetter
-Get-Inventory -DestinationFolder "$SurvivorDriveLetter:\Inventory-Script\Computers\IronRidge"
+Get-Inventory -DestinationFolder "$($SurvivorDriveLetter):\Inventory-Script\Computers\IronRidge"
