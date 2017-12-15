@@ -33,229 +33,214 @@
    #Pulls the currently installed version of Flash from the registry.
     #http://www.adobe.com/software/flash/about/?UPCDeviceType=Homepage&UPCLocale=en_US&UPCInstallLocale=en_US&
     $Flash =  Get-ItemProperty 'HKLM:\SOFTWARE\Macromedia\FlashPlayer\'
-    $Flash = if ([string]::IsNullOrEmpty($Flash.CurrentVersion))
-             {
+    $Flash = if ([string]::IsNullOrEmpty($Flash.CurrentVersion)) {
                  Write-Output 'NULL'
              }
-             else 
-             {
+             else {
                  Write-Output $Flash.CurrentVersion | ForEach-Object {$_ -replace ",", "."}     #Replaces commas “,” with periods “.” for consistency.
              }
-        Write-Verbose "Old Flash: $($Flash)" -Verbose
+        Write-Verbose "Old Flash: $($Flash)"
 
     $FlashNPAPIKey = 'HKLM:\SOFTWARE\Macromedia\FlashPlayerPlugin'    #NPAPI Flash registry key
     $FlashNPAPITest = Test-Path $FlashNPAPIKey    #Check if it is instlled
-    If ($FlashNPAPITest -eq "True")
-        {
+    If ($FlashNPAPITest -eq "True") {
             $FlashNPAPI = Get-ItemProperty $FlashNPAPIKey
-            #Write-Output $FlashNPAPI
-            Write-Verbose "Flash NPAPI: $($FlashNPAPI.Version)" -Verbose
+            Write-Verbose "Flash NPAPI: $($FlashNPAPI.Version)"
         }
-        Else
-        {
+        Else {
             $FlashNPAPI = Write-Output 'NULL'
-            Write-Verbose "Flash NPAPI: NULL" -Verbose
+            Write-Verbose "Flash NPAPI: NULL"
         }
 
 
     $FlashPPAPIKey = 'HKLM:\SOFTWARE\Macromedia\FlashPlayerPepper'
     $FlashPPAPITest = Test-Path $FlashPPAPIKey
-    If ($FlashPPAPITest -eq "True")
-        {
+    If ($FlashPPAPITest -eq "True") {
             $FlashPPAPI = Get-ItemProperty $FlashPPAPIKey
-            #Write-Output $FlashPPAPI
-            Write-Verbose  "Flash PPAPI (Pepper): $($FlashPPAPI.Version)" -Verbose
+            Write-Verbose  "Flash PPAPI (Pepper): $($FlashPPAPI.Version)"
         }
-         Else
-        {
+         Else {
             $FlashPPAPI = Write-Output 'NULL'
-            Write-Verbose "Flash PPAPI (Pepper): NULL" -Verbose
+            Write-Verbose "Flash PPAPI (Pepper): NULL"
         }
 
 
     $FlashActiveXKey = 'HKLM:\SOFTWARE\Macromedia\FlashPlayerActiveX'
     $FlashActiveXTest = Test-Path $FlashNPAPIKey
-    If($FlashActiveXTest -eq "True")
-        {
+    If($FlashActiveXTest -eq "True") {
             $FlashActiveX = Get-ItemProperty $FlashActiveXKey
-            #Write-Output $FlashActiveX
-            Write-Verbose "Flash ActiveX: $($FlashActiveX.Version)" -Verbose           
+            Write-Verbose "Flash ActiveX: $($FlashActiveX.Version)"         
         }
-        Else
-        {
+        Else {
             $FlashActiveX = Write-Output 'NULL'
-            Write-Verbose "Flash ActiveX: NULL" -Verbose
+            Write-Verbose "Flash ActiveX: NULL"
         }
         
 
+# #Flash Update
+#     #Get newest version number
+#     $TestFlashVersion = Test-Path .\NewestFlash.txt
+#         If ($TestFlashVersion -like "False")
+#         {
+#             New-Item .\NewestFlash.txt
+#         }
+#     $NewestFlashFile = Get-ItemProperty .\NewestFlash.txt    #Find the date the file was last modified
+#     $FlashFileDiffernce = $NewestFlashFile.LastWriteTime-$DateRegular    #Subtract the file date from the current date/time.
+#     If ($FlashFileDiffernce.Days*-1 -gt 1 -and $PSVersionTable.PSVersion.Major -gt 2)    #Invoke-WebRequest requires PowerShell version 3+.
+#     {
+#         #Is Flash updated? 
+#         $adobecom = Invoke-WebRequest "https://get.adobe.com/flashplayer/"                                                         #Check Adobe's website for the latest version number.
+#         $NewestFlash = $adobecom.AllElements | Where-Object {$_.InnerHtml -like "version *"} | Select-Object innerHTML -First 1    #Select the version number from the webpage.
+#             Write-Output $NewestFlash.innerHTML > .\NewestFlash.txt                                                                #Write it to a file.
+#             (Get-Content .\NewestFlash.txt) -replace 'Version ','' | ForEach-Object {$_.TrimEnd()} | Set-Content .\NewestFlash.txt        #Cleanup the output and make it ready to be read.
+#     }
+#     Else 
+#     {
+#         #
+#         Write-Verbose "Reading plug-in version from file..." -Verbose
+#     }
+#     #run for PowerShell version 2:
+#         $NewestFlash = Get-Content .\NewestFlash.txt
+#         If ($FlashNPAPI.version -NotLike $NewestFlash) 
+#         {
+#             Write-Error -ErrorVariable erFlash -Message "Flash needs to be updated: $($FlashNPAPI.version) not $NewestFlash"
 
-    #Get newest version number
-    $TestFlashVersion = Test-Path .\NewestFlash.txt
-        If ($TestFlashVersion -like "False")
-        {
-            New-Item .\NewestFlash.txt
-        }
-    $NewestFlashFile = Get-ItemProperty .\NewestFlash.txt    #Find the date the file was last modified
-    $FlashFileDiffernce = $NewestFlashFile.LastWriteTime-$DateRegular    #Subtract the file date from the current date/time.
-    If ($FlashFileDiffernce.Days*-1 -gt 1 -and $PSVersionTable.PSVersion.Major -gt 2)    #Invoke-WebRequest requires PowerShell version 3+.
-    {
-        #Is Flash updated? 
-        $adobecom = Invoke-WebRequest "https://get.adobe.com/flashplayer/"                                                         #Check Adobe's website for the latest version number.
-        $NewestFlash = $adobecom.AllElements | Where-Object {$_.InnerHtml -like "version *"} | Select-Object innerHTML -First 1    #Select the version number from the webpage.
-            Write-Output $NewestFlash.innerHTML > .\NewestFlash.txt                                                                #Write it to a file.
-            (Get-Content .\NewestFlash.txt) -replace 'Version ','' | ForEach-Object {$_.TrimEnd()} | Set-Content .\NewestFlash.txt        #Cleanup the output and make it ready to be read.
-    }
-    Else 
-    {
-        #
-        Write-Verbose "Reading plug-in version from file..." -Verbose
-    }
-    #run for PowerShell version 2:
+#                 #Options menu
+#                     $title = "Update Flash"
+#                     $message = "Do you want to update flash to $($NewestFlash)?"
 
+#                     $yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes", `
+#                         "Downloads and installs the latest version of Flash."
 
-        $NewestFlash = Get-Content .\NewestFlash.txt
-        If ($FlashNPAPI.version -NotLike $NewestFlash) 
-        {
-            Write-Error -ErrorVariable erFlash -Message "Flash needs to be updated: $($FlashNPAPI.version) not $NewestFlash"
+#                     $no = New-Object System.Management.Automation.Host.ChoiceDescription "&No", `
+#                         "Skips updating Flash."
 
-                #Options menu
-                    $title = "Update Flash"
-                    $message = "Do you want to update flash to $($NewestFlash)?"
+#                     $options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no)
 
-                    $yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes", `
-                        "Downloads and installs the latest version of Flash."
+# 		        #Set as '$result' to prompt user. 
+#                 #Set as '1' to skip.
+#                     $result = 1
+#                     #$result = $host.ui.PromptForChoice($title, $message, $options, 1)
 
-                    $no = New-Object System.Management.Automation.Host.ChoiceDescription "&No", `
-                        "Skips updating Flash."
-
-                    $options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no)
-
-		        #Set as '$result' to prompt user. 
-                #Set as '1' to skip.
-                    $result = 1
-                    #$result = $host.ui.PromptForChoice($title, $message, $options, 1)
-
-                    switch ($result)
-                    {
-                        0 
-                        {
-			            <#    $FlashInstallers = Get-ChildItem ".\flash\flashplayer*install.exe"	
-                            ForEach-Object ($Installer in $FlashInstallers) 
-                            {
-                                Copy-Item $Installer $env:TEMP
-                                Start-Process $Installer -Wait
-                            }
-                            #clean up
-                            Remove-Item "$env:TEMP\flashplayer*install.exe"
-                        #>       
-                        }
-                        1 
-                        {
-                            "Skipping..."
-                        }
-                    }
-            } 
-        Else 
-        {
-            Write-Verbose "Flash is up-to-date: $($FlashNPAPI.Version)" -Verbose
-        }
+#                     switch ($result)
+#                     {
+#                         0 
+#                         {
+# 			            <#    $FlashInstallers = Get-ChildItem ".\flash\flashplayer*install.exe"	
+#                             ForEach-Object ($Installer in $FlashInstallers) 
+#                             {
+#                                 Copy-Item $Installer $env:TEMP
+#                                 Start-Process $Installer -Wait
+#                             }
+#                             #clean up
+#                             Remove-Item "$env:TEMP\flashplayer*install.exe"
+#                         #>       
+#                         }
+#                         1 
+#                         {
+#                             "Skipping..."
+#                         }
+#                     }
+#             } 
+#         Else 
+#         {
+#             Write-Verbose "Flash is up-to-date: $($FlashNPAPI.Version)" -Verbose
+#         }
 
 
 #Java
     #OLDer $Java = Get-WmiObject Win32_Product -Filter "Name like 'Java % Update %'" | where {$_.Name -notlike '* Development Kit *'} | Sort-Object Version
     #OLD $Java = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{26A24AE4-039D-4CA4-87B4-2F64180111F0}'    #may need to make the key a variable with *
     
-    IF ($system.SystemType -eq "X86-based PC")   
-    {
+    IF ($system.SystemType -eq "X86-based PC") {
         $JavaKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{26A24AE4-039D-4CA4-87B4-2F*}'    #Use this key if on a 32-bit system
     }
-    Else
-    {
+    Else {
         $JavaKey = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{26A24AE4-039D-4CA4-87B4-2F*}'    #Use this key if on a 64-bit system    
     }
+
     $JavaTest = Test-Path $JavaKey    #test to see if Java is installed
-    If ($JavaTest -eq "True")    #if it is...
-    {
+    If ($JavaTest -eq "True") {    #if it is... 
         $Java = Get-ItemProperty $JavaKey | Where-Object {$_.DisplayName -like 'Java *'}    #Get the properties of the correct registry key
-        Write-Verbose "Java Runtime Environment (JRE): $($Java.DisplayVersion)" -Verbose    #Display the version of JRE to the console
+        Write-Verbose "Java Runtime Environment (JRE): $($Java.DisplayVersion)"    #Display the version of JRE to the console
     }
-    Else
-    {
+    Else {
         $Java = Write-Output 'NULL'
-        Write-Verbose "Java Runtime Environment (JRE): NULL or incorect '*bit' version installed" -Verbose
+        Write-Verbose "Java Runtime Environment (JRE): NULL or incorect '*bit' version installed"
     }
         
-        $TestJavaVersion = Test-Path .\NewestJava.txt
-        If ($TestJavaVersion -like "False")
-        {
-            New-Item .\NewestJava.txt
-        }
-        $NewestJavaFile = Get-ItemProperty .\NewestJava.txt
-        $JavaFileDifference = $NewestJavahFile.LastWriteTime-$DateRegular
-        If ($javahFileDiffernce.Days*-1 -gt 1 -and $PSVersionTable.PSVersion.Major -gt 2)
-        {
-            #Is Java updated?
-            $javacom = Invoke-WebRequest "http://www.java.com/en/download/"
-            $NewestJava = $javacom.AllElements | Where-Object {$_.InnerHtml -like "Version * Update *"} | Select-Object innerHTML -First 1
-                Write-Output $NewestJava.innerHTML > .\NewestJava.txt
+# #Java Update
+#         $TestJavaVersion = Test-Path .\NewestJava.txt
+#         If ($TestJavaVersion -like "False")
+#         {
+#             New-Item .\NewestJava.txt
+#         }
+#         $NewestJavaFile = Get-ItemProperty .\NewestJava.txt
+#         $JavaFileDifference = $NewestJavahFile.LastWriteTime-$DateRegular
+#         If ($javahFileDiffernce.Days*-1 -gt 1 -and $PSVersionTable.PSVersion.Major -gt 2)
+#         {
+#             #Is Java updated?
+#             $javacom = Invoke-WebRequest "http://www.java.com/en/download/"
+#             $NewestJava = $javacom.AllElements | Where-Object {$_.InnerHtml -like "Version * Update *"} | Select-Object innerHTML -First 1
+#                 Write-Output $NewestJava.innerHTML > .\NewestJava.txt
                 
-                (Get-Content .\NewestJava.txt) -replace 'Version','Java' | ForEach-Object {$_.TrimEnd()} | Set-Content .\NewestJava.txt    #Replaces the word 'Version' that is pulled from the web page to 'Java' to match what is in WMI.
-        }
-        Else
-        {
-            Write-Verbose "Reading plug-in version from file..." -Verbose
-        }
+#                 (Get-Content .\NewestJava.txt) -replace 'Version','Java' | ForEach-Object {$_.TrimEnd()} | Set-Content .\NewestJava.txt    #Replaces the word 'Version' that is pulled from the web page to 'Java' to match what is in WMI.
+#         }
+#         Else
+#         {
+#             Write-Verbose "Reading plug-in version from file..." -Verbose
+#         }
 
-      #removes 64-bit from the Java name so just the version is compared.
-        $JavaName = $Java.DisplayName -replace "\(64-bit\)","" | ForEach-Object {$_.TrimEnd()}
-        $NewestJava = (Get-Content .\NewestJava.txt)
+#       #removes 64-bit from the Java name so just the version is compared.
+#         $JavaName = $Java.DisplayName -replace "\(64-bit\)","" | ForEach-Object {$_.TrimEnd()}
+#         $NewestJava = (Get-Content .\NewestJava.txt)
         
-        If ($JavaName -NotLike $NewestJava) 
-        {
-            Write-Error -Message "Java needs to be updated: $JavaName not $NewestJava"
+#         If ($JavaName -NotLike $NewestJava) 
+#         {
+#             Write-Error -Message "Java needs to be updated: $JavaName not $NewestJava"
 
-            #Options menu
-                $title = "Update Java"
-                $message = "Do you want to update Java to $($NewestJava + "?")"
+#             #Options menu
+#                 $title = "Update Java"
+#                 $message = "Do you want to update Java to $($NewestJava + "?")"
 
-                $yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes", `
-                    "Downloads and installs the latest version of Java."
+#                 $yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes", `
+#                     "Downloads and installs the latest version of Java."
 
-                $no = New-Object System.Management.Automation.Host.ChoiceDescription "&No", `
-                    "Skips updating Java."
+#                 $no = New-Object System.Management.Automation.Host.ChoiceDescription "&No", `
+#                     "Skips updating Java."
 
-                $options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no)
+#                 $options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no)
 	
-	        #set as '$result to prompt user. Set as '1' to skip.
-                $result = 1 
-                #$result = $host.ui.PromptForChoice($title, $message, $options, 1)                     
+# 	        #set as '$result to prompt user. Set as '1' to skip.
+#                 $result = 1 
+#                 #$result = $host.ui.PromptForChoice($title, $message, $options, 1)                     
                  
-                switch ($result)
-                {
-                    0 
-                    {   
-                        $JavaIntaller = '.\java\'                          
-                        if ($system.SystemType -eq "x64-based PC") 
-                        {
-                            Start-Process .\java\jxpiinstall.exe -Wait
-                        }
-                        else 
-                        {
-                            Start-Process .\java\jxpiinstall.exe -Wait
-                        }
+#                 switch ($result)
+#                 {
+#                     0 
+#                     {   
+#                         $JavaIntaller = '.\java\'                          
+#                         if ($system.SystemType -eq "x64-based PC") 
+#                         {
+#                             Start-Process .\java\jxpiinstall.exe -Wait
+#                         }
+#                         else 
+#                         {
+#                             Start-Process .\java\jxpiinstall.exe -Wait
+#                         }
                            
-                    }
-                    1 
-                    {
-                        Write-Verbose "Skipping..."
-                    }
-                } 
+#                     }
+#                     1 
+#                     {
+#                         Write-Verbose "Skipping..."
+#                     }
+#                 } 
                 
-            } 
-        else 
-        {
-            Write-Verbose "Java is up-to-date: $($Java.DisplayName)" -Verbose
-        }
+#             } 
+#         else 
+#         {
+#             Write-Verbose "Java is up-to-date: $($Java.DisplayName)" -Verbose
+#         }
 
 #Chrome
     IF ($system.SystemType -eq "X86-based PC") 
