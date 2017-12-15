@@ -661,7 +661,7 @@
                 'Special Programs' = ''
                 'Location' = ''
                 'C Encrypted' = $CBLVolumeStatus;
-                'D Encrypted' = $CBLVolumeStatus;
+                'D Encrypted' = $DBLVolumeStatus;
             }
             Write-Output $IronRidge
             $IronRidge | Export-Csv -Path $DestinationFolder\IronRidge.csv -Append
