@@ -1,5 +1,11 @@
-﻿$DestinationFolder = Get-Content .\dest.txt
-
+﻿#Checks for output folder preference text file
+$DestinationTXT = Test-Path .\dest.txt
+    If ($DestinationTXT -eq $false) {
+        $DestinationFolder = ".\"
+    }
+    else {
+        $DestinationFolder = Get-Content .\dest.txt
+    }
 function Get-Inventory {
     [CmdletBinding()]
     param (
