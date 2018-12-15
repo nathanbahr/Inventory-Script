@@ -1,4 +1,6 @@
-﻿function Get-Inventory {
+﻿$DestinationFolder = Get-Content .\dest.txt
+
+function Get-Inventory {
     [CmdletBinding()]
     param (
     [PSDefaultValue(Help = 'Current directory')]
@@ -535,7 +537,7 @@
 #         }
 
 #Output
-    #Full
+    <#Inventory Full#>
             $InventoryFull = [PSCustomObject]@{
                 'ID' = $id;
                 'Hostname' = $ComputerName;
@@ -612,12 +614,38 @@
                 'IP4' = $oct3;
             }
             Write-Output $InventoryFull
-            $InventoryFull | Export-Csv -Path $DestinationFolder\InventoryFull.csv -Append                
+            $InventoryFull | Export-Csv -Path $DestinationFolder\InventoryFull.csv -Append
+            
+    <#Inventory Medium#>   
+            $InventoryMedium = [PSCustomObject]@{
+                'Timestamp' = $date;
+                'User Name' = $user;
+                'Employees' = $user;
+                'Status' = '';
+                'Tag' = '';
+                'Date Checked' = $DateReadable;
+                'Hostname'= $ComputerName;
+                'Asset' = 'Laptop';
+                'Model Name' = $system.Model;
+                'Category' = '';
+                'Serial Number' = $bios.SerialNumber;
+                'OS' = $os.Caption -replace 'Microsoft ','';
+                'CPU Name' = $CPU.Name;
+                'Memory' = "$memory GB";
+                'Storage' = "$CDriveCapacity GB";
+                'TeamViewer' = $TeamViewer.ClientID;
+                'Google Drive' = $GoogleDrive;
+                'Date Deployed' = ''
+                'Special Programs' = ''
+                'Location' = ''
+                'C Encrypted' = $CBLVolumeStatus;
+                'D Encrypted' = $DBLVolumeStatus;
+            }
+            Write-Output $InventoryMedium
+            $InventoryMedium | Export-Csv -Path $DestinationFolder\InventoryMedium.csv -Append             
 
-    <#Library#>     
-        If ($DestinationFolder -like "*Library*") 
-        {                
-            $Library = [PSCustomObject]@{
+    <#Inventory Small#>              
+            $InventorySmall = [PSCustomObject]@{
                 'Timestamp' = $date;
                 'Hostname' = $ComputerName;
                 'Description' = '';
@@ -633,39 +661,19 @@
                 'Type' = '';
                 'Password' = '';
         }
-            Write-Output $Library
-            $Library | Export-Csv -Path $DestinationFolder\Library.csv -Append
-        }
+            $InventorySmall | Export-Csv -Path $DestinationFolder\InventorySmall.csv -Append
 
-    <#IronRidge#>   
-        If ($DestinationFolder -like "*IronRidge*") 
-        {
-            $IronRidge = [PSCustomObject]@{
+    <#Inventory Micro#>              
+            $InventoryMicro = [PSCustomObject]@{
                 'Timestamp' = $date;
-                'User Name' = $user;
-                'Employees' = $user;
-                'Status' = '';
                 'Tag' = '';
-                'Date Checked' = $DateReadable;
-                'Hostname'= $ComputerName;
-                'Asset' = 'Laptop';
+                'Employee' = $user;
                 'Model Name' = $system.Model;
-                'Category' = '';
                 'Serial Number' = $bios.SerialNumber;
-                'OS' = $os.Caption -replace 'Microsoft ','';
-                'Memory' = "$memory GB";
-                'Storage' = "$CDriveCapacity GB";
-                'TeamViewer' = $TeamViewer.ClientID;
-                'Google Drive' = $GoogleDrive;
-                'Date Deployed' = ''
-                'Special Programs' = ''
-                'Location' = ''
-                'C Encrypted' = $CBLVolumeStatus;
-                'D Encrypted' = $DBLVolumeStatus;
-            }
-            Write-Output $IronRidge
-            $IronRidge | Export-Csv -Path $DestinationFolder\IronRidge.csv -Append
+                'Status' = '';
+                'Date Checked' = $DateReadable;
         }
+            $InventoryMicro | Export-Csv -Path $DestinationFolder\InventoryMicro.csv -Append     
 
 # #Makes text files with detailed information about computer.
 #     Write-Output $ipconfig $netAdapter $route $Firewall $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedNetwork.txt
@@ -696,7 +704,7 @@
 #         #$Error | Out-File $LogFile -Append
 #         $erFlash | Out-File $LogFile -Append
 #         $erJava | Out-File $LogFile -Append
-
 }
-$SurvivorDriveLetter = (Get-Volume -FileSystemLabel SURVIVOR).DriveLetter
-Get-Inventory -DestinationFolder "$($SurvivorDriveLetter):\Inventory-Script\Computers\IronRidge"
+
+
+Get-Inventory -DestinationFolder $DestinationFolder
