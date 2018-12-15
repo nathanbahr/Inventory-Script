@@ -522,23 +522,7 @@ function Get-Inventory {
                 'Status' = '';
                 'Date Checked' = $DateReadable;
         }
-            $InventoryMicro | Export-Csv -Path $DestinationFolder\InventoryMicro.csv -Append     
-
-# #Makes text files with detailed information about computer.
-#     Write-Output $ipconfig $netAdapter $route $Firewall $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedNetwork.txt
-#     Write-Output $ComputerName $user $system $CPU $bios $NetUser $AdminUsers $VidDriver <#$Printer#> <#$PrinterDriver#> $DiskDrives $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
-#     Get-WmiObject SoftwareLicensingService >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedSystem.txt
-#         if ($os.Version -gt "6.1.7601")
-#         {
-#             Get-Volume >> $DestinationFolder\details\$ComputerName\$Timestamp-Drives.txt
-#             Get-Printer >> $DestinationFolder\details\$ComputerName\$Timestamp-Printers.txt
-#         }
-#     Write-Output $ComputerName $os $bios $IE $firefox $Chrome $Flash $Java $PSVersionTable $date " " >> $DestinationFolder\details\$ComputerName\$Timestamp-detailedVersion.txt   
-# 	    Get-childitem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\' | Export-Clixml "$DestinationFolder\details\$ComputerName\$Timestamp-applications.xml"    #lists all installed 32-bit programs in a XML file
-# 	    if ($System.SystemType -eq "X64-based PC")    #only for 64-bit computers
-#         {
-#             Get-childitem 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' | Export-Clixml "$DestinationFolder\details\$ComputerName\$Timestamp-applications64.xml"    #lists all installed 64-bit programs in a XML file
-#         }
+            $InventoryMicro | Export-Csv -Path $DestinationFolder\InventoryMicro.csv -Append
 
 # remove quotes
     foreach ($file in Get-ChildItem $DestinationFolder\*.csv)    #Selects the files
