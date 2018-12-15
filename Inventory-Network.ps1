@@ -455,7 +455,7 @@ function Get-Inventory {
                 'IP4' = $oct3;
             }
             Write-Output $InventoryFull
-            $InventoryFull | Export-Csv -Path $DestinationFolder\InventoryFull.csv -Append
+            $InventoryFull | Export-Csv -Path $DestinationFolder\InventoryFull.csv -Append -NoTypeInformation
             
     <#Inventory Medium#>   
             $InventoryMedium = [PSCustomObject]@{
@@ -483,7 +483,7 @@ function Get-Inventory {
                 'D Encrypted' = $DBLVolumeStatus;
             }
             Write-Output $InventoryMedium
-            $InventoryMedium | Export-Csv -Path $DestinationFolder\InventoryMedium.csv -Append             
+            $InventoryMedium | Export-Csv -Path $DestinationFolder\InventoryMedium.csv -Append -NoTypeInformation
 
     <#Inventory Small#>              
             $InventorySmall = [PSCustomObject]@{
@@ -502,7 +502,7 @@ function Get-Inventory {
                 'Type' = '';
                 'Password' = '';
         }
-            $InventorySmall | Export-Csv -Path $DestinationFolder\InventorySmall.csv -Append
+            $InventorySmall | Export-Csv -Path $DestinationFolder\InventorySmall.csv -Append -NoTypeInformation
 
     <#Inventory Micro#>              
             $InventoryMicro = [PSCustomObject]@{
@@ -514,7 +514,7 @@ function Get-Inventory {
                 'Status' = '';
                 'Date Checked' = $DateReadable;
         }
-            $InventoryMicro | Export-Csv -Path $DestinationFolder\InventoryMicro.csv -Append
+            $InventoryMicro | Export-Csv -Path $DestinationFolder\InventoryMicro.csv -Append -NoTypeInformation
 
 # remove quotes
     foreach ($file in Get-ChildItem $DestinationFolder\*.csv)    #Selects the files
