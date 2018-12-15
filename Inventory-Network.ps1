@@ -99,7 +99,7 @@ function Get-Inventory {
         $Java = Write-Output 'NULL'
         Write-Verbose "Java Runtime Environment (JRE): NULL or incorect '*bit' version installed"
     }
-    
+
 
 #Chrome
     IF ($system.SystemType -eq "X86-based PC") 
@@ -151,14 +151,6 @@ function Get-Inventory {
         Write-Verbose "Firefox 64-bit: NULL" -Verbose
     }
 
-
-<#
-        If ($FirefoxVersion -NotLike "52.0.2") 
-        {
-            $FirefoxPath = $Firefox.DisplayIcon -replace ",0",""    #Sets the path to Firefox from the registry.
-            Start-Process $FirefoxPath     #Opens Firefox to manually run the built-in auto update.
-        }
-#>
 
 #Internet Explorer
     $IE = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Internet Explorer'
