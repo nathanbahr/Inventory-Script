@@ -1,2 +1,2 @@
-powershell -ExecutionPolicy ByPass -File Inventory.ps1
+powershell -ExecutionPolicy ByPass -File Inventory-Network.ps1
 pause

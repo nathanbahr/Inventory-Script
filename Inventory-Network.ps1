@@ -29,8 +29,6 @@ function Get-Inventory {
     $id = "$($oct2)$($oct3)"
 
 
-
-
 #Flash
    #Pulls the currently installed version of Flash from the registry.
     #http://www.adobe.com/software/flash/about/?UPCDeviceType=Homepage&UPCLocale=en_US&UPCInstallLocale=en_US&
