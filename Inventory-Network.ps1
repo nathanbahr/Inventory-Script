@@ -363,7 +363,6 @@ function Get-Inventory {
         }
 
 #Destination Folder
-    
     $DestinationFolderPath = Test-Path $DestinationFolder
         If ($DestinationFolderPath -eq 'True') 
         {
@@ -373,17 +372,6 @@ function Get-Inventory {
         {
             mkdir "$($DestinationFolder)"
         }
-
-# #Details Folder
-#     $dirDetail = Test-Path "$DestinationFolder\details\$ComputerName"
-#         If ($dirDetail -eq "True")
-#         {
-#             Write-Verbose "Writing to: $DestinationFolder\details\$ComputerName" -Verbose
-#         } 
-#         Else 
-#         {
-#             mkdir $DestinationFolder\details\$ComputerName
-#         }
 
 #Output
     <#Inventory Full#>
