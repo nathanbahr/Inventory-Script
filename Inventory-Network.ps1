@@ -1,4 +1,4 @@
-﻿#Checks for output folder preference text file
+﻿#Checks for output folder preference text file. If one does not exist, use the curent folder.
 $DestinationTXT = Test-Path .\dest.txt
     If ($DestinationTXT -eq $false) {
         $DestinationFolder = ".\"
