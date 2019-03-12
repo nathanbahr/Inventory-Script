@@ -476,11 +476,11 @@ function Get-Inventory {
                 'Storage' = "$CDriveCapacity GB";
                 'TeamViewer' = $TeamViewer.ClientID;
                 'Google Drive' = $GoogleDrive;
+                'C Encrypted' = $CBLVolumeStatus;
+                'D Encrypted' = $DBLVolumeStatus;
                 'Date Deployed' = ''
                 'Special Programs' = ''
                 'Location' = ''
-                'C Encrypted' = $CBLVolumeStatus;
-                'D Encrypted' = $DBLVolumeStatus;
             }
             Write-Output $InventorySmall
             $InventorySmall | Export-Csv -Path $DestinationFolder\InventorySmall.csv -Append -NoTypeInformation
