@@ -457,7 +457,7 @@ function Get-Inventory {
             Write-Output $InventoryFull
             $InventoryFull | Export-Csv -Path $DestinationFolder\InventoryFull.csv -Append -NoTypeInformation
             
-    <#Inventory Medium#>   
+    <#Inventory Small#>   
             $InventoryMedium = [PSCustomObject]@{
                 'Timestamp' = $date;
                 'User Name' = $user;
@@ -482,39 +482,9 @@ function Get-Inventory {
                 'C Encrypted' = $CBLVolumeStatus;
                 'D Encrypted' = $DBLVolumeStatus;
             }
-            Write-Output $InventoryMedium
-            $InventoryMedium | Export-Csv -Path $DestinationFolder\InventoryMedium.csv -Append -NoTypeInformation
-
-    <#Inventory Small#>              
-            $InventorySmall = [PSCustomObject]@{
-                'Timestamp' = $date;
-                'Hostname' = $ComputerName;
-                'Description' = '';
-                'User Name' = $user;
-                'IP Address' = $FirstIP;
-                'Admin Privileges' = $AdminPrivileges;
-                'Model Name' = $system.Model;
-                'Serial Number' = $bios.SerialNumber;
-                'Patch Port' = '';
-                'Switchport' = '';
-                'Extension/Switch' = '';
-                'Location' = '';
-                'Type' = '';
-                'Password' = '';
-        }
+            Write-Output $InventorySmall
             $InventorySmall | Export-Csv -Path $DestinationFolder\InventorySmall.csv -Append -NoTypeInformation
 
-    <#Inventory Micro#>              
-            $InventoryMicro = [PSCustomObject]@{
-                'Timestamp' = $date;
-                'Tag' = '';
-                'Employee' = $user;
-                'Model Name' = $system.Model;
-                'Serial Number' = $bios.SerialNumber;
-                'Status' = '';
-                'Date Checked' = $DateReadable;
-        }
-            $InventoryMicro | Export-Csv -Path $DestinationFolder\InventoryMicro.csv -Append -NoTypeInformation
 
 # remove quotes
     foreach ($file in Get-ChildItem $DestinationFolder\*.csv)    #Selects the files
