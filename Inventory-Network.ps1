@@ -474,6 +474,7 @@ function Get-Inventory {
                 'CPU Name' = $CPU.Name;
                 'Memory' = "$memory GB";
                 'Storage' = "$CDriveCapacity GB";
+                'MAC Address' = $network.MACAddress;
                 'TeamViewer' = $TeamViewer.ClientID;
                 'Google Drive' = $GoogleDrive;
                 'C Encrypted' = $CBLVolumeStatus;
