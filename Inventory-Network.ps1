@@ -458,7 +458,7 @@ function Get-Inventory {
             $InventoryFull | Export-Csv -Path $DestinationFolder\InventoryFull.csv -Append -NoTypeInformation
             
     <#Inventory Small#>   
-            $InventoryMedium = [PSCustomObject]@{
+            $InventorySmall = [PSCustomObject]@{
                 'Timestamp' = $date;
                 'User Name' = $user;
                 'Employees' = $user;
@@ -479,9 +479,9 @@ function Get-Inventory {
                 'Google Drive' = $GoogleDrive;
                 'C Encrypted' = $CBLVolumeStatus;
                 'D Encrypted' = $DBLVolumeStatus;
-                'Date Deployed' = ''
-                'Special Programs' = ''
-                'Location' = ''
+                'Date Deployed' = '';
+                'Special Programs' = '';
+                'Location' = '';
             }
             Write-Output $InventorySmall
             $InventorySmall | Export-Csv -Path $DestinationFolder\InventorySmall.csv -Append -NoTypeInformation
