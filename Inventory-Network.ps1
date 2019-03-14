@@ -488,11 +488,11 @@ function Get-Inventory {
 
 #Apps
     $GetApps32bit = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
-    $apps32bit = $GetApps32bit | Select-Object displayname, displayversion, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}} | Sort-object -Property DisplayName
+    $apps32bit = $GetApps32bit | Select-Object displayname, displayversion, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Sort-object -Property DisplayName
     $apps32bit | Export-Csv -Path $DestinationFolder\Apps.csv -Append -NoTypeInformation
 
     $GetApps64bit = Get-ItemProperty 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' 
-    $apps64bit = $GetApps64bit | Select-Object displayname, displayversion, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}} | Sort-object -Property DisplayName
+    $apps64bit = $GetApps64bit | Select-Object displayname, displayversion, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Sort-object -Property DisplayName
     $apps64bit | Export-Csv -Path $DestinationFolder\Apps.csv -Append -NoTypeInformation
 
 
