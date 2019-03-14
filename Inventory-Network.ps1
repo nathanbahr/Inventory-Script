@@ -486,6 +486,15 @@ function Get-Inventory {
             Write-Output $InventorySmall
             $InventorySmall | Export-Csv -Path $DestinationFolder\InventorySmall.csv -Append -NoTypeInformation
 
+#Apps
+    $GetApps32bit = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
+    $apps32bit = $GetApps32bit | Select-Object displayname, displayversion, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}} | Sort-object -Property DisplayName
+    $apps32bit | Export-Csv -Path $DestinationFolder\Apps.csv -Append -NoTypeInformation
+
+    $GetApps64bit = Get-ItemProperty 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' 
+    $apps64bit = $GetApps64bit | Select-Object displayname, displayversion, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}} | Sort-object -Property DisplayName
+    $apps64bit | Export-Csv -Path $DestinationFolder\Apps.csv -Append -NoTypeInformation
+
 
 # remove quotes
     foreach ($file in Get-ChildItem $DestinationFolder\*.csv)    #Selects the files
