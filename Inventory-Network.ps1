@@ -380,7 +380,7 @@ function Get-Inventory {
 #Output
     <#Inventory Full#>
             $InventoryFull = [PSCustomObject]@{
-                'ID' = $id;
+                'NetID' = $id;
                 'Hostname' = $ComputerName;
                 'Timestamp' = $date;
                 'Serial Number' = $bios.SerialNumber;
