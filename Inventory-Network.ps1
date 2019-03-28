@@ -20,10 +20,7 @@ function Get-Inventory {
 
 #Date
     $Date =  Get-Date -format s
-    $DateRegular = Get-Date
     $DateReadable = Get-Date -Format g
-    $Timestamp = Get-Date -Format o | ForEach-Object {$_ -replace ":", "."}
-
 
 
 #ID
