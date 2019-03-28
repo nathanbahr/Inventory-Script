@@ -213,7 +213,7 @@ function Get-Inventory {
         } 
         Else 
         {
-            $AdapterType = Get-WmiObject win32_networkadapter -filter "netconnectionstatus = 2" | select AdapterType | Select -first 1
+            $AdapterType = Get-WmiObject win32_networkadapter -filter "netconnectionstatus = 2" | Select-Object AdapterType | Select-Object -first 1
             $netAdapter =  $AdapterType.AdapterType
         }
 
@@ -242,6 +242,8 @@ function Get-Inventory {
 #System
     $os = Get-WmiObject Win32_operatingSystem
         Write-Output "Windows: $($SoftwareLicensing.Version)"
+        $ProductKey = $SoftwareLicensing.OA3xOriginalProductKey 
+        Write-Verbose "Key: $ProductKey" -Verbose
 
     $CPU = Get-WmiObject Win32_Processor     #Gets information on the CPU
         Write-Output "CPU: $($CPU.Name)"
@@ -264,8 +266,7 @@ function Get-Inventory {
         $Printer = Get-Printer
         $PrinterDriver = Get-PrinterDriver
     }
-    $ProductKey = $SoftwareLicensing.OA3xOriginalProductKey 
-        Write-Verbose "Key: $ProductKey" -Verbose
+    
 
 #Storage
     #$Volume = Get-Volume    #Requires Windows 8 or newer. Using "Get-PSDrive" instead.
@@ -283,7 +284,7 @@ function Get-Inventory {
         <#https://blogs.technet.microsoft.com/heyscriptingguy/2014/10/11/weekend-scripter-use-powershell-to-calculate-and-display-percentages/#>
 
 #BitLocker
-    $FixedDrives = Get-Volume | Where {$_.DriveType -eq "Fixed"}
+    $FixedDrives = Get-Volume | Where-Object {$_.DriveType -eq "Fixed"}
         If ($FixedDrives.driveletter -eq "D") {
             $DBitLocker = Get-BitLockerVolume -MountPoint D:
             $DBLVolumeStatus = $DBitLocker.VolumeStatus
@@ -300,7 +301,7 @@ function Get-Inventory {
 #Video Driver
     $VidDriver = Get-WmiObject win32_VideoController
 
-        $AMDVidDriver = $VidDriver | Where {$_.Name -like "*AMD*" -or $_.Name -like "*Radeon*"}
+        $AMDVidDriver = $VidDriver | Where-Object {$_.Name -like "*AMD*" -or $_.Name -like "*Radeon*"}
         If ([string]::IsNullOrEmpty($AMDVidDriver))    #Sees if an AMD GPU is instlled
         {
             $AMDVidDriver = 'NULL'    #If not, mark as empty
@@ -337,7 +338,7 @@ function Get-Inventory {
         }
         Else
         {
-            $NVIDIAVidDriver = $VidDriver | Where {$_.Name -Like "*NVIDIA*"}
+            $NVIDIAVidDriver = $VidDriver | Where-Object {$_.Name -Like "*NVIDIA*"}
             $NVIDIAVidDriverVersion = $NVIDIAVidDriver | Select-Object DriverVersion -First 1
             $NVIDIAVidDriverName = $NVIDIAVidDriver | Select-Object Name -First 1
             Write-Output "$($NVIDIAVidDriverName.Name)"
@@ -413,12 +414,14 @@ function Get-Inventory {
                 'Used' = "$CDriveUsed GB";
                 'Free' = "$CDriveFree GB";
                 'Percent Used' = $CDrivePercentUsed;
-                'C BitLocker Volume' = $CBLVolumeStatus;
-                'C BitLocker Protection' = $CDBLProtectionStatus;
-                'C BitLocker Percentage' = $CBLEncryptionPercentage;
-                'D BitLocker Volume' = $DBLVolumeStatus;
-                'D BitLocker Protection' = $DDBLProtectionStatus;
-                'D BitLocker Percentage' = $DBLEncryptionPercentage;
+                'C BitLocker' = $CBLProtectionStatus;
+                'C BL Volume' = $CBLVolumeStatus;
+                'C BL Protection' = $CDBLProtectionStatus;
+                'C BL Percentage' = $CBLEncryptionPercentage;
+                'D BitLocker' = $DBLProtectionStatus;
+                'D BL Volume' = $DBLVolumeStatus;
+                'D BL Protection' = $DDBLProtectionStatus;
+                'D BL Percentage' = $DBLEncryptionPercentage;
                 'BL ID' = '';
                 'BL Key' = '';
                 'Windows Key' = $ProductKey;
