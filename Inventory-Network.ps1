@@ -245,8 +245,6 @@ function Get-Inventory {
 
     $CPU = Get-WmiObject Win32_Processor     #Gets information on the CPU
         Write-Output "CPU: $($CPU.Name)"
-
-        $MaxMHz = ((Get-WmiObject Win32_Processor).MaxClockSpeed)    #Gets the maximum clock speed in MHz.
         $MaxGHz = $CPU | ForEach-Object {[math]::Round($_.MaxClockSpeed / 10)}    #Rounds the clock speed to go from MHz to GHz.
         $MaxGHz = "$($MaxGHz / 100) GHz"    #Adds the decimal place and GHz label.
         
@@ -259,8 +257,7 @@ function Get-Inventory {
 
     $bios = Get-WmiObject Win32_bios
     $user = $env:username
-    $NetUser = net user
-            #$firefox = Write-Output $FirefoxKey.DisplayVersion
+
     $Firewall = netsh advfirewall show allprofiles
     $Desktop = [Environment]::GetFolderPath("Desktop")
     If ($PSVersionTable.PSVersion.Major -gt 4) {
