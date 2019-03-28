@@ -216,8 +216,6 @@ function Get-Inventory {
             $AdapterType = Get-WmiObject win32_networkadapter -filter "netconnectionstatus = 2" | select AdapterType | Select -first 1
             $netAdapter =  $AdapterType.AdapterType
         }
-    $ipconfig = ipconfig /all
-    $route = route print
 
     $FirstIP = if ([string]::IsNullOrEmpty($network.IPAddress[0])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[0]}
     $SecondIP = if ([string]::IsNullOrEmpty($network.IPAddress[1])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[1]}
