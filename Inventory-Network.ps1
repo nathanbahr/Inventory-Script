@@ -487,12 +487,14 @@ function Get-Inventory {
             $InventorySmall | Export-Csv -Path $DestinationFolder\InventorySmall.csv -Append -NoTypeInformation
 
 #Apps
+    $32bit = "32-bit"
     $GetApps32bit = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
-    $apps32bit = $GetApps32bit | Select-Object displayname, displayversion, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Sort-object -Property DisplayName
+    $apps32bit = $GetApps32bit | Select-Object displayname, displayversion, @{label='Bit';e={$32bit}}, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Sort-object -Property DisplayName
     $apps32bit | Export-Csv -Path $DestinationFolder\Apps.csv -Append -NoTypeInformation
 
+    $64bit = "64-bit"
     $GetApps64bit = Get-ItemProperty 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' 
-    $apps64bit = $GetApps64bit | Select-Object displayname, displayversion, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Sort-object -Property DisplayName
+    $apps64bit = $GetApps64bit | Select-Object displayname, displayversion, @{label='Bit';e={$64bit}}, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Sort-object -Property DisplayName
     $apps64bit | Export-Csv -Path $DestinationFolder\Apps.csv -Append -NoTypeInformation
 
 
