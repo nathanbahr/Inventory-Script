@@ -259,7 +259,7 @@ function Get-Inventory {
     $user = $env:username
 
     $Firewall = netsh advfirewall show allprofiles
-    $Desktop = [Environment]::GetFolderPath("Desktop")
+    $DesktopPath = [Environment]::GetFolderPath("Desktop")
     If ($PSVersionTable.PSVersion.Major -gt 4) {
         $Printer = Get-Printer
         $PrinterDriver = Get-PrinterDriver
@@ -402,6 +402,7 @@ function Get-Inventory {
                 'System Type' = $system.SystemType
                 'Username' = $user;
                 'Admin Privileges' = $AdminPrivileges;
+                'Desktop Path' = $DesktopPath;
                 'TeamViewer' = $TeamViewer.ClientID;
                 'AMD GPU' = $AMDVidDriverName.Name;
                 'NVIDIA GPU' = $NVIDIAVidDriverName.Name;
