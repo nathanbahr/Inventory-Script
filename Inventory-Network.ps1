@@ -371,6 +371,39 @@ function Get-Inventory {
         }
 
 #Output
+<#CompHardware#>
+$CompHardware = [PSCustomObject]@{
+    'Hostname' = $ComputerName;
+    'Serial Number' = $bios.SerialNumber;
+    'Manufacturer' = $system.Manufacturer;
+    'Model Number' = $system.Model;
+    'MAC Address' = $network.MACAddress;
+    'Network Adapter' = $network.Description;
+    'Adapter Type' = $netAdapter;
+    'CPU Name' = $CPU.Name;
+    'Physical Cores' = $CPU.NumberOfCores;
+    'Logical Cores' = $CPU.NumberOfLogicalProcessors;
+    'Max Frequency' = $MaxGHz;
+    'Memory' = "$memory GB";
+    'Username' = $user;
+    'Admin Privileges' = $AdminPrivileges;
+    'Desktop Path' = $DesktopPath;
+    'TeamViewer' = $TeamViewer.ClientID;
+    'AMD GPU' = $AMDVidDriverName.Name;
+    'NVIDIA GPU' = $NVIDIAVidDriverName.Name;
+    'Intel GPU' = $IntelVidDriverName.Name;
+    'Primary Drive Model' = $CDriveModel;
+    'Capacity' = "$CDriveCapacity GB";
+    'Windows Key' = $ProductKey;
+    'OS Name' = $os.Caption -replace 'Microsoft ','';
+    'Architecture' = $system.SystemType
+    'Timestamp' = $date;
+}
+Write-Output $CompHardware
+$CompHardware | Export-Csv -Path $DestinationFolder\CompHardware.csv -Append -NoTypeInformation
+
+
+
     <#Inventory Full#>
             $InventoryFull = [PSCustomObject]@{
                 'NetID' = $id;
