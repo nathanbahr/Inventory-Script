@@ -206,13 +206,21 @@ function Get-Inventory {
         }
 
 #Network
+If ($PSVersionTable.PSVersion.Major -gt 4) {
+    $EthernetAdapter = Get-NetAdapter -Name Ethernet
+    $WiFiAdapter = Get-NetAdapter -Name Wi-Fi
+
+    $EthernetIPv4 = Get-NetIPAddress -InterfaceAlias Ethernet -AddressFamily IPv4
+    $EthernetIPv6 = Get-NetIPAddress -InterfaceAlias Ethernet -AddressFamily IPv6
+    $WiFiIPv4 = Get-NetIPAddress -InterfaceAlias Wi-Fi -AddressFamily IPv4
+    $WiFiIPv6 = Get-NetIPAddress -InterfaceAlias Wi-Fi -AddressFamily IPv6
+ }
+
     $network = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -ComputerName 127.0.0.1 -Filter "IpEnabled = TRUE"
-        If ($network.Description -like "*Wireless*")
-        {
+        If ($network.Description -like "*Wireless*") {
             $netAdapter = "Wireless"
         } 
-        Else 
-        {
+        Else {
             $AdapterType = Get-WmiObject win32_networkadapter -filter "netconnectionstatus = 2" | Select-Object AdapterType | Select-Object -first 1
             $netAdapter =  $AdapterType.AdapterType
         }
@@ -221,11 +229,13 @@ function Get-Inventory {
     $SecondIP = if ([string]::IsNullOrEmpty($network.IPAddress[1])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[1]}
     $FirstSub = if ([string]::IsNullOrEmpty($network.IPSubnet[0])) {Write-Output 'NULL'} else {Write-Output $network.IPSubnet[0]}
     $SecondSub = if ([string]::IsNullOrEmpty($network.IPSubnet[1])) {Write-Output 'NULL'} else {Write-Output $network.IPSubnet[1]}
+
     $WINS = if ([string]::IsNullOrEmpty($network.WINSPrimaryServer)) {Write-Output 'NULL'} else {Write-Output $network.WINSPrimaryServer}
     $WINSBackup = if ([string]::IsNullOrEmpty($network.WINSSecondaryServer)) {Write-Output 'NULL'} else {Write-Output $network.WINSSecondaryServer}
     $DNS = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[0])) {Write-Output 'NULL'} else {Write-Output $network.DNSServerSearchOrder[0]}
-    $DNSBackup = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[1])) {Write-Output 'NULL'} else {Write-Output $network.DNSServerSearchOrder[1..4]}
+    $DNSBackup = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[1])) {Write-Output 'NULL'} else {Write-Output $network.DNSServerSearchOrder[1]}
 
+    
 #TeamViewer
     $TeamViewerKey = 'HKLM:\SOFTWARE\WOW6432Node\TeamViewer\Version9'
     $TeamViewerTest = Test-Path $TeamViewerKey
@@ -374,35 +384,104 @@ function Get-Inventory {
 <#CompHardware#>
 $CompHardware = [PSCustomObject]@{
     'Hostname' = $ComputerName;
-    'Serial Number' = $bios.SerialNumber;
-    'Manufacturer' = $system.Manufacturer;
-    'Model Number' = $system.Model;
-    'MAC Address' = $network.MACAddress;
-    'Network Adapter' = $network.Description;
-    'Adapter Type' = $netAdapter;
-    'CPU Name' = $CPU.Name;
-    'Physical Cores' = $CPU.NumberOfCores;
-    'Logical Cores' = $CPU.NumberOfLogicalProcessors;
-    'Max Frequency' = $MaxGHz;
+    'SerialNumber' = $bios.SerialNumber;
+    'Manufacturer' = $System.Manufacturer -replace ",", "";
+    'ModelNumber' = $system.Model;
+    'EthernetAdapter' = $EthernetAdapter.InterfaceDescription;
+    'EthernetState' = $EthernetAdapter.Status;
+    'EthernetMAC' = $EthernetAdapter.MacAddress;
+    'EthernetSpeed' = $EthernetAdapter.LinkSpeed;
+    'WiFiAdapter' = $WiFiAdapter.InterfaceDescription;
+    'WiFiState' = $WiFiAdapter.Status;
+    'WiFiMAC' = $WiFiAdapter.MacAddress;
+    'WiFiSpeed' = $WiFiAdapter.LinkSpeed;
+    'CPUName' = $CPU.Name;
+    'PhysicalCores' = $CPU.NumberOfCores;
+    'LogicalCores' = $CPU.NumberOfLogicalProcessors;
+    'MaxFrequency' = $MaxGHz;
     'Memory' = "$memory GB";
     'Username' = $user;
-    'Admin Privileges' = $AdminPrivileges;
-    'Desktop Path' = $DesktopPath;
+    'AdminPrivileges' = $AdminPrivileges;
+    'DesktopPath' = $DesktopPath;
     'TeamViewer' = $TeamViewer.ClientID;
-    'AMD GPU' = $AMDVidDriverName.Name;
-    'NVIDIA GPU' = $NVIDIAVidDriverName.Name;
-    'Intel GPU' = $IntelVidDriverName.Name;
-    'Primary Drive Model' = $CDriveModel;
+    'AMDGPU' = $AMDVidDriverName.Name;
+    'NVIDIAGPU' = $NVIDIAVidDriverName.Name;
+    'IntelGPU' = $IntelVidDriverName.Name;
+    'PrimaryDriveModel' = $CDriveModel;
     'Capacity' = "$CDriveCapacity GB";
-    'Windows Key' = $ProductKey;
-    'OS Name' = $os.Caption -replace 'Microsoft ','';
+    'WindowsKey' = $ProductKey;
+    'OSName' = $os.Caption -replace 'Microsoft ','';
     'Architecture' = $system.SystemType
     'Timestamp' = $date;
 }
 Write-Output $CompHardware
 $CompHardware | Export-Csv -Path $DestinationFolder\CompHardware.csv -Append -NoTypeInformation
 
-
+<#CompSystem#>
+$CompSystem = [PSCustomObject]@{
+    'Hostname' = $ComputerName;
+    'SerialNumber' = $bios.SerialNumber;
+    'EthernetIPv4' = $EthernetIPv4;
+    'EthtIPv4Prefix' = $EthernetIPv4.PrefixLength;
+    'EthIPv4PrefixOrigin' = $EthernetIPv4.PrefixOrigin;
+    'EthernetIPv6' = $EthernetIPv6;
+    'EthtIPv6Prefix' = $EthernetIPv6.PrefixLength;
+    'EthtIPv6PrefixOrigin' = $EthernetIPv6.PrefixOrigin;
+    'WiFiIPv4' = $WiFiIPv4;
+    'WiFiIPv4Prefix' = $WiFiIPv4.PrefixLength;
+    'WiFiIPv4PrefixOrigin' = $WiFiIPv4.PrefixOrigin;
+    'WiFiIPv6' = $WiFiIPv6;
+    'WiFiIPv6Prefix' = $WiFiIPv6.PrefixLength;
+    'WiFiIPv6PrefixOrigin' = $WiFiIPv6.PrefixOrigin;
+    'DefaultGateway' = $network.DefaultIPGateway[0];
+    'PrimaryDNS' = $DNS;
+    'BackupDNS' = $DNSBackup;
+    'Domain' = $system.Domain;
+    'FreeMemory' = "$FreeMemory GB";
+    'MemPctUsed' = "$FreeMemoryPercent %";
+    'Username' = $user;
+    'AdminPrivileges' = $AdminPrivileges;
+    'DesktopPath' = $DesktopPath;
+    'TeamViewer' = $TeamViewer.ClientID;
+    'GoogeleDrive' = $GoogleDrive;
+    'DiskUsed' = "$CDriveUsed GB";
+    'DiskFree' = "$CDriveFree GB";
+    'DiskPctUsed' = $CDrivePercentUsed;
+    'C_BitLocker' = $CBLProtectionStatus;
+    'C_BLVolume' = $CBLVolumeStatus;
+    'C_BLProtection' = $CDBLProtectionStatus;
+    'C_BLPct' = $CBLEncryptionPercentage;
+    'D_BitLocker' = $DBLProtectionStatus;
+    'D_BLVolume' = $DBLVolumeStatus;
+    'D_BLProtection' = $DDBLProtectionStatus;
+    'D_BLPct' = $DBLEncryptionPercentage;
+    'OS Number' = $SoftwareLicensing.version;
+    'OS Build' = $os.BuildNumber;
+    'SMBIOS' = $bios.SMBIOSBIOSVersion;
+    'BIOS Version' = $bios.Version;
+    'BIOS Date/Name' = $bios.Name;
+    'Internet Explorer' = $IE.svcVersion;
+    'Firefox 32-bit' = $Firefox.DisplayVersion;
+    'Firefox 64-bit' = $Firefox64.DisplayVersion;
+    'Chrome' = $Chrome.Version;
+    'Flash' = $Flash;
+    'Flash NPAPI' = $FlashNPAPI.Version;
+    'Flash PPAPI' = $FlashPPAPI.Version;
+    'Java' = $Java.DisplayVersion;
+    'Adobe Reader' = $Reader.DisplayVersion;
+    'PowerShell' = $PSVersionTable.PSVersion;
+    'AMD Driver' = $AMDVidDriverVersion.DriverVersion;
+    'NVIDIA Driver' = $NVIDIAVidDriverVersion.DriverVersion;
+    'Intel Driver' = $IntelVidDriverVersion.DriverVersion;
+    'McAfee' = $McAfeeAgent;
+    'IP1' = $oct0;
+    'IP2' = $oct1;
+    'IP3' = $oct2;
+    'IP4' = $oct3;
+    'Timestamp' = $date;
+}
+Write-Output $CompSystem
+$CompSystem | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoTypeInformation
 
     <#Inventory Full#>
             $InventoryFull = [PSCustomObject]@{
