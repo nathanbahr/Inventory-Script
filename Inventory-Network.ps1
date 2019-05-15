@@ -279,6 +279,8 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
     
 
 #Storage
+$CDisk = Get-Disk -Number 0     #https://docs.microsoft.com/en-us/powershell/module/storage/get-disk?view=win10-ps
+
     #$Volume = Get-Volume    #Requires Windows 8 or newer. Using "Get-PSDrive" instead.
     $DiskDrives = Get-WMIObject Win32_DiskDrive
     $CDriveModel = ($DiskDrives | Where-Object {$_.deviceID -eq "\\.\PHYSICALDRIVE0"}).Model
@@ -293,8 +295,11 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
         <#Get-Volume -DriveLetter C | select @{L="PercentUsed";E={($_.sizeremaining/$_.size).ToString("P")}}#>
         <#https://blogs.technet.microsoft.com/heyscriptingguy/2014/10/11/weekend-scripter-use-powershell-to-calculate-and-display-percentages/#>
 
+
+
 #BitLocker
 $PowerShellAdmin = [bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")     #check if PowerShell is running as an administrator
+    #https://superuser.com/questions/749243/detect-if-powershell-is-running-as-administrator
 if ($PowerShellAdmin -eq $true) {
     $FixedDrives = Get-Volume | Where-Object {$_.DriveType -eq "Fixed"}
         If ($FixedDrives.driveletter -eq "D") {
@@ -391,7 +396,7 @@ $CompHardware = [PSCustomObject]@{
     'Hostname' = $ComputerName;
     'SerialNumber' = $bios.SerialNumber;
     'Manufacturer' = $System.Manufacturer -replace ",", "";
-    'ModelNumber' = $system.Model;
+    'ModelNumber' = $system.Model -replace ",", ".";
     'EthernetAdapter' = $EthernetAdapter.InterfaceDescription;
     'EthernetState' = $EthernetAdapter.Status;
     'EthernetMAC' = $EthernetAdapter.MacAddress;
@@ -412,7 +417,8 @@ $CompHardware = [PSCustomObject]@{
     'AMDGPU' = $AMDVidDriverName.Name;
     'NVIDIAGPU' = $NVIDIAVidDriverName.Name;
     'IntelGPU' = $IntelVidDriverName.Name;
-    'PrimaryDriveModel' = $CDriveModel;
+    'PrimaryDriveModel' = $CDriveModel -replace ",", "";
+    'BusType' = $CDisk.BusType;
     'Capacity' = "$CDriveCapacity GB";
     'WindowsKey' = $ProductKey;
     'OSName' = $os.Caption -replace 'Microsoft ','';
