@@ -294,6 +294,8 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
         <#https://blogs.technet.microsoft.com/heyscriptingguy/2014/10/11/weekend-scripter-use-powershell-to-calculate-and-display-percentages/#>
 
 #BitLocker
+$PowerShellAdmin = [bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")     #check if PowerShell is running as an administrator
+if ($PowerShellAdmin -eq $true) {
     $FixedDrives = Get-Volume | Where-Object {$_.DriveType -eq "Fixed"}
         If ($FixedDrives.driveletter -eq "D") {
             $DBitLocker = Get-BitLockerVolume -MountPoint D:
@@ -306,7 +308,10 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
     $CBLVolumeStatus = $CBitLocker.VolumeStatus
     $CBLProtectionStatus = $CBitLocker.ProtectionStatus
     $CBLEncryptionPercentage = $CBitLocker.EncryptionPercentage
-        
+}
+else{
+    Write-Output "skipping BitLocker..."
+}
 
 #Video Driver
     $VidDriver = Get-WmiObject win32_VideoController
