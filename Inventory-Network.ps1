@@ -583,7 +583,6 @@ $CompSystem | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoType
                 'IP3' = $oct2;
                 'IP4' = $oct3;
             }
-            Write-Output $InventoryFull
             $InventoryFull | Export-Csv -Path $DestinationFolder\InventoryFull.csv -Append -NoTypeInformation
             
     <#Inventory Small#>   
@@ -612,7 +611,6 @@ $CompSystem | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoType
                 'Special Programs' = '';
                 'Location' = '';
             }
-            Write-Output $InventorySmall
             $InventorySmall | Export-Csv -Path $DestinationFolder\InventorySmall.csv -Append -NoTypeInformation
 
 #Apps
