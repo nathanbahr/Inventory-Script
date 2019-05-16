@@ -268,9 +268,16 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
 
     $bios = Get-WmiObject Win32_bios
     $user = $env:username
-
-    $Firewall = netsh advfirewall show allprofiles
     $DesktopPath = [Environment]::GetFolderPath("Desktop")
+
+
+#Firewall
+    $FirewallState = netsh advfirewall show allprofiles | Where-Object {$_ -match "State"} |ForEach-Object {$_ -replace "State                                 ",""}
+        $DomainFW = $FirewallState[0]
+        $PrivateFW = $FirewallState[1]
+        $PublicFW = $FirewallState[2]
+
+#Printers
     If ($PSVersionTable.PSVersion.Major -gt 4) {
         $Printer = Get-Printer
     }
@@ -459,6 +466,9 @@ $CompSystem = [PSCustomObject]@{
     'DiskUsed' = "$CDriveUsed GB";
     'DiskFree' = "$CDriveFree GB";
     'DiskPctUsed' = $CDrivePercentUsed;
+    'DomainFW' = $DomainFW;
+    'PrivateFW' = $PrivateFW;
+    'PublicFW' = $PublicFW;
     'C_BitLocker' = $CBLProtectionStatus;
     'C_BLVolume' = $CBLVolumeStatus;
     'C_BLProtection' = $CDBLProtectionStatus;
