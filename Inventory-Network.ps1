@@ -29,7 +29,6 @@ function Get-Inventory {
     $oct1 = $ipID.trim().Split(".")[1]
     $oct2 = $ipID.trim().Split(".")[2]
     $oct3 = $ipID.trim().Split(".")[3]
-    $id = "$($oct2)$($oct3)"
 
 
 #Flash
@@ -274,7 +273,6 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
     $DesktopPath = [Environment]::GetFolderPath("Desktop")
     If ($PSVersionTable.PSVersion.Major -gt 4) {
         $Printer = Get-Printer
-        $PrinterDriver = Get-PrinterDriver
     }
     
 
@@ -291,6 +289,8 @@ $CDisk = Get-Disk -Number 0     #https://docs.microsoft.com/en-us/powershell/mod
             $CDriveCapacity = ForEach-Object {[math]::Round($CDriveCapacity / 1GB)}
 
         $CDrivePercentUsed = ($CDriveUsed/$CDriveCapacity).ToString("P")
+
+$CMediaType = (Get-CimInstance MSFT_PhysicalDisk -Namespace Root\Microsoft\Windows\Storage |Where-Object {$_.model -eq $CDriveModel}).MediaType
         
         <#Get-Volume -DriveLetter C | select @{L="PercentUsed";E={($_.sizeremaining/$_.size).ToString("P")}}#>
         <#https://blogs.technet.microsoft.com/heyscriptingguy/2014/10/11/weekend-scripter-use-powershell-to-calculate-and-display-percentages/#>
@@ -418,6 +418,7 @@ $CompHardware = [PSCustomObject]@{
     'NVIDIAGPU' = $NVIDIAVidDriverName.Name;
     'IntelGPU' = $IntelVidDriverName.Name;
     'PrimaryDriveModel' = $CDriveModel -replace ",", "";
+    'MediaType' = $CMediaType;
     'BusType' = $CDisk.BusType;
     'Capacity' = "$CDriveCapacity GB";
     'WindowsKey' = $ProductKey;
@@ -496,7 +497,6 @@ $CompSystem | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoType
 
     <#Inventory Full#>
             $InventoryFull = [PSCustomObject]@{
-                'NetID' = $id;
                 'Hostname' = $ComputerName;
                 'Timestamp' = $date;
                 'Serial Number' = $bios.SerialNumber;
@@ -616,6 +616,9 @@ $CompSystem | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoType
     $apps64bit = $GetApps64bit | Select-Object displayname, displayversion, @{label='Bit';e={$64bit}}, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Sort-object -Property DisplayName
     $apps64bit | Export-Csv -Path $DestinationFolder\Apps.csv -Append -NoTypeInformation
 
+#Printers
+    $CompPrinters = $Printer | Select-Object Name, DriverName, PortName, Shared, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}}
+    $CompPrinters | Export-Csv -Path $DestinationFolder\CompPrinters.csv -Append -NoTypeInformation
 
 # remove quotes
     foreach ($file in Get-ChildItem $DestinationFolder\*.csv)    #Selects the files
