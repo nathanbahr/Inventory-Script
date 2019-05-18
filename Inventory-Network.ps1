@@ -259,6 +259,9 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
         $MaxGHz = $CPU | ForEach-Object {[math]::Round($_.MaxClockSpeed / 10)}    #Rounds the clock speed to go from MHz to GHz.
         $MaxGHz = "$($MaxGHz / 100) GHz"    #Adds the decimal place and GHz label.
         
+#Memory
+$PhysicalMemory = Get-CimInstance Win32_PhysicalMemory
+$PhysicalMemory | Select-Object Caption, Description, InstallDate, Name, Status, CreationClassName, Manufacturer, Model, OtherIdentifyingInfo, PartNumber, PoweredOn, SerialNumber, SKU, Tag, Version, HotSwappable, Removable, Replaceable, FormFactor, BankLabel, Capacity, DataWidth, InterleavePosition, MemoryType, PositionInRow, Speed, TotalWidth, Attributes, ConfiguredClockSpeed, ConfiguredVoltage, DeviceLocator, InterleaveDataDepth, MaxVoltage, MinVoltage, SMBIOSMemoryType, TypeDetail, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompMemory.csv -Append -NoTypeInformation
 
     $memory = Get-WmiObject Win32_computersystem | ForEach-Object {[math]::round($_.totalPhysicalMemory / 1GB)}   #Displays the amount of system memory rounded to the nearest gigabyte.
         Write-Output "RAM: $($memory) GB"
