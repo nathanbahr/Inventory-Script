@@ -25,8 +25,7 @@ $DestinationFolderPath = Test-Path $DestinationFolder
 $ComputerName = hostname
 
 #Date
-    $Date =  Get-Date -format s
-    $DateReadable = Get-Date -Format g
+    $Date =  Get-Date -Format "yyyy-MM-dd HH:mm:ss:ffff"
 
 #CIM
 $System = Get-WmiObject Win32_ComputerSystem
@@ -720,7 +719,7 @@ $CompSystem | Export-Csv -Path $DestinationFolder\OLDCompSystem.csv -Append -NoT
                 'Employees' = $user;
                 'Status' = '';
                 'Tag' = '';
-                'Date Checked' = $DateReadable;
+                'Date Checked' = $Date;
                 'Hostname'= $ComputerName;
                 'Asset' = 'Laptop';
                 'Model Name' = $system.Model;
