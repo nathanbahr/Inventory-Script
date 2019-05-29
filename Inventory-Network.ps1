@@ -13,23 +13,117 @@ function Get-Inventory {
     $DestinationFolder = '.\Computers'
     )
 
-    $System = Get-WmiObject Win32_ComputerSystem
-    $ComputerName = hostname
-    $SoftwareLicensing = Get-WmiObject SoftwareLicensingService
+$DestinationFolderPath = Test-Path $DestinationFolder
+    If ($DestinationFolderPath -eq 'True') {
+        Write-Verbose "Using existing folder: $($DestinationFolder)" -Verbose
+    } 
+    Else {
+        mkdir "$($DestinationFolder)"
+    }
 
+
+$ComputerName = hostname
 
 #Date
     $Date =  Get-Date -format s
     $DateReadable = Get-Date -Format g
 
+#CIM
+$System = Get-WmiObject Win32_ComputerSystem
+$SoftwareLicensing = Get-WmiObject SoftwareLicensingService
+$Win32Processor = Get-CimInstance Win32_Processor
+$Win32DiskDrive = Get-CimInstance Win32_DiskDrive
+$Win32MSFTPhysicalDisk = Get-CimInstance MSFT_PhysicalDisk -Namespace Root\Microsoft\Windows\Storage
+$WinOperatingSystem =  Get-CimInstance Win32_OperatingSystem
+$Win32PhysicalMemory = Get-CimInstance Win32_PhysicalMemory
+$VidDriver = Get-CimInstance win32_VideoController
 
-#ID
+#IP octets
     $ipID = ipconfig | Where-Object {$_ -match "IPv4 Address"} | ForEach-Object{$_.Split(":")[1]}
     $oct0 = $ipID.trim().Split(".")[0]
     $oct1 = $ipID.trim().Split(".")[1]
     $oct2 = $ipID.trim().Split(".")[2]
     $oct3 = $ipID.trim().Split(".")[3]
 
+
+
+
+Get-Disk | Select-Object DiskNumber, PartitionStyle, ProvisioningType, OperationalStatus, HealthStatus, BusType, UniqueIdFormat, OfflineReason, ObjectId, PassThroughClass, PassThroughIds, PassThroughNamespace, PassThroughServer, UniqueId, AdapterSerialNumber, AllocatedSize, BootFromDisk, FirmwareVersion, FriendlyName, Guid, IsBoot, IsClustered, IsHighlyAvailable, IsOffline, IsReadOnly, IsScaleOut, IsSystem, LargestFreeExtent, Location, LogicalSectorSize, Manufacturer, Model, Number, NumberOfPartitions, Path, PhysicalSectorSize, SerialNumber, Signature, Size, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompDisk.csv -Append -NoTypeInformation
+
+Get-Volume |Select-Object OperationalStatus, HealthStatus, DriveType, FileSystemType, DedupMode, ObjectId, PassThroughClass, PassThroughIds, PassThroughNamespace, PassThroughServer, UniqueId, AllocationUnitSize, DriveLetter, FileSystem, FileSystemLabel, Path, Size, SizeRemaining, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompVolume.csv -Append -NoTypeInformation
+
+$Win32DiskDrive | Select-Object PSComputerName, ConfigManagerErrorCode, LastErrorCode, NeedsCleaning, Status, DeviceID, StatusInfo, Partitions, BytesPerSector, ConfigManagerUserConfig, DefaultBlockSize, Index, InstallDate, InterfaceType, MaxBlockSize, MaxMediaSize, MinBlockSize, NumberOfMediaSupported, SectorsPerTrack, Size, TotalCylinders, TotalHeads, TotalSectors, TotalTracks, TracksPerCylinder, __GENUS, __CLASS, __SUPERCLASS, __DYNASTY, __RELPATH, __PROPERTY_COUNT, __DERIVATION, __SERVER, __NAMESPACE, __PATH, Availability, Capabilities, CapabilityDescriptions, Caption, CompressionMethod, CreationClassName, Description, ErrorCleared, ErrorDescription, ErrorMethodology, FirmwareRevision, Manufacturer, MediaLoaded, MediaType, Model, Name, PNPDeviceID, PowerManagementCapabilities, PowerManagementSupported, SCSIBus, SCSILogicalUnit, SCSIPort, SCSITargetId, SerialNumber, Signature, SystemCreationClassName, SystemName, Scope, Path, Options, ClassPath, Properties, SystemProperties, Qualifiers, Site, Container, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompDrive.csv -Append -NoTypeInformation
+
+$Win32MSFTPhysicalDisk |Select-Object ClassName, Usage, OperationalStatus, UniqueIdFormat, HealthStatus, BusType, CannotPoolReason, SupportedUsages, MediaType, SpindleSpeed, ObjectId, PassThroughClass, PassThroughIds, PassThroughNamespace, PassThroughServer, UniqueId, Description, FriendlyName, Manufacturer, Model, OperationalDetails, PhysicalLocation, SerialNumber, AdapterSerialNumber, AllocatedSize, CanPool, DeviceId, EnclosureNumber, FirmwareVersion, IsIndicationEnabled, IsPartial, LogicalSectorSize, OtherCannotPoolReasonDescription, PartNumber, PhysicalSectorSize, Size, SlotNumber, SoftwareVersion, StoragePoolUniqueId, VirtualDiskFootprint, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\PhysicalDisk.csv -Append -NoTypeInformation
+
+$WinOperatingSystem | Select-Object Status, Name, FreePhysicalMemory, FreeSpaceInPagingFiles, FreeVirtualMemory, Caption, Description, InstallDate, CreationClassName, CSCreationClassName, CSName, CurrentTimeZone, Distributed, LastBootUpTime, LocalDateTime, MaxNumberOfProcesses, MaxProcessMemorySize, NumberOfLicensedUsers, NumberOfProcesses, NumberOfUsers, OSType, OtherTypeDescription, SizeStoredInPagingFiles, TotalSwapSpaceSize, TotalVirtualMemorySize, TotalVisibleMemorySize, Version, BootDevice, BuildNumber, BuildType, CodeSet, CountryCode, CSDVersion, DataExecutionPrevention_32BitApplications, DataExecutionPrevention_Available, DataExecutionPrevention_Drivers, DataExecutionPrevention_SupportPolicy, Debug, EncryptionLevel, ForegroundApplicationBoost, LargeSystemCache, Locale, Manufacturer, MUILanguages, OperatingSystemSKU, Organization, OSArchitecture, OSLanguage, OSProductSuite, PAEEnabled, PlusProductID, PlusVersionNumber, PortableOperatingSystem, Primary, ProductType, RegisteredUser, SerialNumber, ServicePackMajorVersion, ServicePackMinorVersion, SuiteMask, SystemDevice, SystemDirectory, SystemDrive, WindowsDirectory, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompOS.csv -Append -NoTypeInformation
+
+$Win32PhysicalMemory | Select-Object Caption, Description, InstallDate, Name, Status, CreationClassName, Manufacturer, Model, OtherIdentifyingInfo, PartNumber, PoweredOn, SerialNumber, SKU, Tag, Version, HotSwappable, Removable, Replaceable, FormFactor, BankLabel, Capacity, DataWidth, InterleavePosition, MemoryType, PositionInRow, Speed, TotalWidth, Attributes, ConfiguredClockSpeed, ConfiguredVoltage, DeviceLocator, InterleaveDataDepth, MaxVoltage, MinVoltage, SMBIOSMemoryType, TypeDetail, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompMemory.csv -Append -NoTypeInformation
+
+
+<#CompCPU#>
+    $CompCPU = [PSCustomObject]@{
+        'ExtClock'                                = $Win32Processor.ExtClock;
+        'L2CacheSize'                             = $Win32Processor.L2CacheSize
+        'L2CacheSpeed'                            = $Win32Processor.L2CacheSpeed
+        'MaxClockSpeed'                           = $Win32Processor.MaxClockSpeed;
+        'PowerManagementSupported'                = $Win32Processor.PowerManagementSupported;
+        'ProcessorType'                           = $Win32Processor.ProcessorType;
+        'Revision'                                = $Win32Processor.Revision;
+        'SocketDesignation'                       = $Win32Processor.SocketDesignation;
+        'VoltageCaps'                             = $Win32Processor.VoltageCaps;
+        'Architecture'                            = $Win32Processor.Architecture;
+        'Caption'                                 = $Win32Processor.Caption;
+        'CurrentVoltage'                          = $Win32Processor.CurrentVoltage;   
+        'CurrentClockSpeed'                       = $Win32Processor.CurrentClockSpeed;
+        'Description'                             = $Win32Processor.Description;
+        'Family'                                  = $Win32Processor.Family;
+        'L3CacheSize'                             = $Win32Processor.L3CacheSize;
+        'L3CacheSpeed'                            = $Win32Processor.L3CacheSpeed;
+        'Level'                                   = $Win32Processor.Level;
+        'Manufacturer'                            = $Win32Processor.Manufacturer;
+        'Name'                                    = $Win32Processor.Name;
+        'NumberOfCores'                           = $Win32Processor.NumberOfCores;
+        'NumberOfLogicalProcessors'               = $Win32Processor.NumberOfLogicalProcessors;
+        'OtherFamilyDescription'                  = $Win32Processor.OtherFamilyDescription;
+        'PartNumber'                              = $Win32Processor.PartNumber;
+        'PNPDeviceID'                             = $Win32Processor.PNPDeviceID;
+        'PowerManagementCapabilities'             = $Win32Processor.PowerManagementCapabilities;
+        'ProcessorId'                             = $Win32Processor.ProcessorId;
+        'SecondLevelAddressTranslationExtensions' = $Win32Processor.SecondLevelAddressTranslationExtensions;
+        'SerialNumber'                            = $Win32Processor.SerialNumber;
+        'Stepping'                                = $Win32Processor.Stepping;
+        'SystemName'                              = $Win32Processor.SystemName;
+        'ThreadCount'                             = $Win32Processor.ThreadCount;
+        'UniqueId'                                = $Win32Processor.UniqueId;
+        'UpgradeMethod'                           = $Win32Processor.UpgradeMethod;
+        'Timestamp'                               = $date;
+    }
+
+    $GetCompCPU = Get-Content .\Computers\CompCPU.csv | Select-String -Pattern $Win32Processor.Name
+    if ($null -eq $GetCompCPU) {
+        $CompCPU | Export-Csv -Path $DestinationFolder\CompCPU.csv -Append -NoTypeInformation
+    }
+    else {
+        Write-Verbose "CPU already in database. Skipping..."
+    }
+   
+
+
+$VidDriver |Select-Object Caption, Description, InstallDate, Name, Status, Availability, ConfigManagerErrorCode, ConfigManagerUserConfig, CreationClassName, DeviceID, ErrorCleared, ErrorDescription, LastErrorCode, PNPDeviceID, PowerManagementCapabilities, PowerManagementSupported, StatusInfo, SystemCreationClassName, SystemName, MaxNumberControlled, ProtocolSupported, TimeOfLastReset, AcceleratorCapabilities, CapabilityDescriptions, CurrentBitsPerPixel, CurrentHorizontalResolution, CurrentNumberOfColors, CurrentNumberOfColumns, CurrentNumberOfRows, CurrentRefreshRate, CurrentScanMode, CurrentVerticalResolution, MaxMemorySupported, MaxRefreshRate, MinRefreshRate, NumberOfVideoPages, VideoMemoryType, VideoProcessor, NumberOfColorPlanes, VideoArchitecture, VideoMode, AdapterCompatibility, AdapterDACType, AdapterRAM, ColorTableEntries, DeviceSpecificPens, DitherType, DriverDate, DriverVersion, ICMIntent, ICMMethod, InfFilename, InfSection, InstalledDisplayDrivers, Monochrome, ReservedSystemPaletteEntries, SpecificationVersion, SystemPaletteEntries, VideoModeDescription, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompGPU.csv -Append -NoTypeInformation
+
+Get-NetAdapter |Select-Object MacAddress, Status, LinkSpeed, MediaType, PhysicalMediaType, AdminStatus, MediaConnectionState, DriverInformation, DriverFileName, NdisVersion, ifOperStatus, ifAlias, InterfaceAlias, ifIndex, ifDesc, ifName, DriverVersion, LinkLayerAddress, Caption, Description, ElementName, InstanceID, CommunicationStatus, DetailedStatus, HealthState, InstallDate, Name, OperatingStatus, OperationalStatus, PrimaryStatus, StatusDescriptions, AvailableRequestedStates, EnabledDefault, EnabledState, OtherEnabledState, RequestedState, TimeOfLastStateChange, TransitioningToState, AdditionalAvailability, Availability, CreationClassName, DeviceID, ErrorCleared, ErrorDescription, IdentifyingDescriptions, LastErrorCode, MaxQuiesceTime, OtherIdentifyingInfo, PowerManagementCapabilities, PowerManagementSupported, PowerOnHours, StatusInfo, SystemCreationClassName, SystemName, TotalPowerOnHours, MaxSpeed, OtherPortType, PortType, RequestedSpeed, Speed, UsageRestriction, ActiveMaximumTransmissionUnit, AutoSense, FullDuplex, LinkTechnology, NetworkAddresses, OtherLinkTechnology, OtherNetworkPortType, PermanentAddress, PortNumber, SupportedMaximumTransmissionUnit, AdminLocked, ComponentID, ConnectorPresent, DeviceName, DeviceWakeUpEnable, DriverDate, DriverDateData, DriverDescription, DriverMajorNdisVersion, DriverMinorNdisVersion, DriverName, DriverProvider, DriverVersionString, EndPointInterface, HardwareInterface, Hidden, HigherLayerInterfaceIndices, IMFilter, InterfaceAdminStatus, InterfaceDescription, InterfaceGuid, InterfaceIndex, InterfaceName, InterfaceOperationalStatus, InterfaceType, iSCSIInterface, LowerLayerInterfaceIndices, MajorDriverVersion, MediaConnectState, MediaDuplexState, MinorDriverVersion, MtuSize, NdisMedium, NdisPhysicalMedium, NetLuid, NetLuidIndex, NotUserRemovable, OperationalStatusDownDefaultPortNotAuthenticated, OperationalStatusDownInterfacePaused, OperationalStatusDownLowPowerState, OperationalStatusDownMediaDisconnected, PnPDeviceID, PromiscuousMode, ReceiveLinkSpeed, State, TransmitLinkSpeed, Virtual, VlanID, WdmInterface, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompNetAdapter.csv -Append -NoTypeInformation
+
+Get-NetIPAddress |Select-Object PrefixOrigin, SuffixOrigin, Type, Store, AddressFamily, AddressState, ifIndex, Caption, Description, ElementName, InstanceID, CommunicationStatus, DetailedStatus, HealthState, InstallDate, Name, OperatingStatus, OperationalStatus, PrimaryStatus, Status, StatusDescriptions, AvailableRequestedStates, EnabledDefault, EnabledState, OtherEnabledState, RequestedState, TimeOfLastStateChange, TransitioningToState, CreationClassName, SystemCreationClassName, SystemName, NameFormat, OtherTypeDescription, ProtocolIFType, ProtocolType, Address, AddressOrigin, AddressType, IPv4Address, IPv6Address, IPVersionSupport, PrefixLength, SubnetMask, InterfaceAlias, InterfaceIndex, IPAddress, PreferredLifetime, SkipAsSource, ValidLifetime, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompNetIP.csv -Append -NoTypeInformation
+<#
+Get-CimInstance Win32_ComputerSystem |Select-Object AdminPasswordStatus, BootupState, ChassisBootupState, KeyboardPasswordStatus, PowerOnPasswordStatus, PowerSupplyState, PowerState, FrontPanelResetStatus, ThermalState, Status, Name, PowerManagementCapabilities, PowerManagementSupported, Caption, Description, InstallDate, CreationClassName, NameFormat, PrimaryOwnerContact, PrimaryOwnerName, Roles, InitialLoadInfo, LastLoadInfo, ResetCapability, AutomaticManagedPagefile, AutomaticResetBootOption, AutomaticResetCapability, BootOptionOnLimit, BootOptionOnWatchDog, BootROMSupported, BootStatus, ChassisSKUNumber, CurrentTimeZone, DaylightInEffect, DNSHostName, Domain, DomainRole, EnableDaylightSavingsTime, HypervisorPresent, InfraredSupported, Manufacturer, Model, NetworkServerModeEnabled, NumberOfLogicalProcessors, NumberOfProcessors, OEMLogoBitmap, OEMStringArray, PartOfDomain, PauseAfterReset, PCSystemType, PCSystemTypeEx, ResetCount, ResetLimit, SupportContactDescription, SystemFamily, SystemSKUNumber, SystemStartupDelay, SystemStartupOptions, SystemStartupSetting, SystemType, TotalPhysicalMemory, UserName, WakeUpType, Workgroup, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date} | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoTypeInformation
+#>
+
+ #Printers
+$Printer = Get-Printer
+<#$Printer |Select-Object RenderingMode, PrinterStatus, Type, DeviceType, Caption, Description, ElementName, InstanceID, CommunicationStatus, DetailedStatus, HealthState, InstallDate, Name, OperatingStatus, OperationalStatus, PrimaryStatus, Status, StatusDescriptions, BranchOfficeOfflineLogSizeMB, Comment, ComputerName, Datatype, DefaultJobPriority, DisableBranchOfficeLogging, DriverName, JobCount, KeepPrintedJobs, Location, PermissionSDDL, PortName, PrintProcessor, Priority, Published, SeparatorPageFile, Shared, ShareName, StartTime, UntilTime, WorkflowPolicy, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date} | Export-Csv -Path $DestinationFolder\CompPrinters.csv -Append -NoTypeInformation;
+ #>
+ 
 
 #Flash
    #Pulls the currently installed version of Flash from the registry.
@@ -260,9 +354,6 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
         $MaxGHz = "$($MaxGHz / 100) GHz"    #Adds the decimal place and GHz label.
         
 #Memory
-$PhysicalMemory = Get-CimInstance Win32_PhysicalMemory
-$PhysicalMemory | Select-Object Caption, Description, InstallDate, Name, Status, CreationClassName, Manufacturer, Model, OtherIdentifyingInfo, PartNumber, PoweredOn, SerialNumber, SKU, Tag, Version, HotSwappable, Removable, Replaceable, FormFactor, BankLabel, Capacity, DataWidth, InterleavePosition, MemoryType, PositionInRow, Speed, TotalWidth, Attributes, ConfiguredClockSpeed, ConfiguredVoltage, DeviceLocator, InterleaveDataDepth, MaxVoltage, MinVoltage, SMBIOSMemoryType, TypeDetail, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompMemory.csv -Append -NoTypeInformation
-
     $memory = Get-WmiObject Win32_computersystem | ForEach-Object {[math]::round($_.totalPhysicalMemory / 1GB)}   #Displays the amount of system memory rounded to the nearest gigabyte.
         Write-Output "RAM: $($memory) GB"
        
@@ -278,20 +369,15 @@ $PhysicalMemory | Select-Object Caption, Description, InstallDate, Name, Status,
     $FirewallState = netsh advfirewall show allprofiles | Where-Object {$_ -match "State"} |ForEach-Object {$_ -replace "State                                 ",""}
         $DomainFW = $FirewallState[0]
         $PrivateFW = $FirewallState[1]
-        $PublicFW = $FirewallState[2]
-
-#Printers
-    If ($PSVersionTable.PSVersion.Major -gt 4) {
-        $Printer = Get-Printer
-    }
-    
+        $PublicFW = $FirewallState[2]    
 
 #Storage
+
+
 $CDisk = Get-Disk -Number 0     #https://docs.microsoft.com/en-us/powershell/module/storage/get-disk?view=win10-ps
 
     #$Volume = Get-Volume    #Requires Windows 8 or newer. Using "Get-PSDrive" instead.
-    $DiskDrives = Get-WMIObject Win32_DiskDrive
-    $CDriveModel = ($DiskDrives | Where-Object {$_.deviceID -eq "\\.\PHYSICALDRIVE0"}).Model
+    $CDriveModel = ($Win32DiskDrive | Where-Object {$_.deviceID -eq "\\.\PHYSICALDRIVE0"}).Model
     $CDrive = Get-PSDrive -Name C
         $CDriveUsed = $CDrive | ForEach-Object {[math]::Round($_.used / 1GB)}
         $CDriveFree = $CDrive | ForEach-Object {[math]::Round($_.free / 1GB)}
@@ -306,11 +392,51 @@ $CMediaType = (Get-CimInstance MSFT_PhysicalDisk -Namespace Root\Microsoft\Windo
         <#https://blogs.technet.microsoft.com/heyscriptingguy/2014/10/11/weekend-scripter-use-powershell-to-calculate-and-display-percentages/#>
 
 
+#Drives
+$LogicalDrives = $Win32DiskDrive | ForEach-Object {
+    $disk = $_
+    $partitions = "ASSOCIATORS OF " +
+                    "{Win32_DiskDrive.DeviceID='$($disk.DeviceID)'} " +
+                    "WHERE AssocClass = Win32_DiskDriveToDiskPartition"
+    Get-WmiObject -Query $partitions | ForEach-Object {
+        $partition = $_
+        $drives = "ASSOCIATORS OF " +
+                "{Win32_DiskPartition.DeviceID='$($partition.DeviceID)'} " +
+                "WHERE AssocClass = Win32_LogicalDiskToPartition"
+        Get-WmiObject -Query $drives | ForEach-Object {
+            [PSCustomObject]@{
+            Disk        = $disk.DeviceID
+            DiskModel   = $disk.Model
+            Partition   = $partition.Name  -replace ",", "";
+            RawSize     = $partition.Size  |ForEach-Object {[math]::Round($_ / 1GB,2)}
+            DriveLetter = $_.DeviceID
+            VolumeName  = $_.VolumeName
+            Size        = $_.Size  |ForEach-Object {[math]::Round($_ / 1GB,2)}
+            FreeSpace   = $_.FreeSpace  |ForEach-Object {[math]::Round($_ / 1GB,2)}
+            FileSystem  = $_.FileSystem
+            InstallDate = $_.InstallDate
+            MaximumComponentLength = $_.MaximumComponentLength
+            MediaType   = $_.MediaType
+            VolumeSerialNumber = $_.VolumeSerialNumber
+            'ComputerName' = $ComputerName;
+            'ComputerSerialNumber' = $bios.SerialNumber;
+            'Timestamp' = $date;
+        }
+        }
+    }
+    }
+    $LogicalDrives | Export-Csv -Path $DestinationFolder\LogicalDrives.csv -Append -NoTypeInformation
+
+#https://stackoverflow.com/questions/31088930/combine-get-disk-info-and-logicaldisk-info-in-powershell
+
+
 
 #BitLocker
 $PowerShellAdmin = [bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")     #check if PowerShell is running as an administrator
     #https://superuser.com/questions/749243/detect-if-powershell-is-running-as-administrator
 if ($PowerShellAdmin -eq $true) {
+    Get-BitLockerVolume |Select-Object ComputerName, MountPoint, EncryptionMethod, AutoUnlockEnabled, AutoUnlockKeyStored, MetadataVersion, VolumeStatus, ProtectionStatus, LockStatus, EncryptionPercentage, WipePercentage, VolumeType, CapacityGB, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompBitLocker.csv -Append -NoTypeInformation
+
     $FixedDrives = Get-Volume | Where-Object {$_.DriveType -eq "Fixed"}
         If ($FixedDrives.driveletter -eq "D") {
             $DBitLocker = Get-BitLockerVolume -MountPoint D:
@@ -329,7 +455,7 @@ else{
 }
 
 #Video Driver
-    $VidDriver = Get-WmiObject win32_VideoController
+    
 
         $AMDVidDriver = $VidDriver | Where-Object {$_.Name -like "*AMD*" -or $_.Name -like "*Radeon*"}
         If ([string]::IsNullOrEmpty($AMDVidDriver))    #Sees if an AMD GPU is instlled
@@ -389,16 +515,7 @@ else{
             Write-Output "Current user does not have administrator privileges."
         }
 
-#Destination Folder
-    $DestinationFolderPath = Test-Path $DestinationFolder
-        If ($DestinationFolderPath -eq 'True') 
-        {
-            Write-Verbose "Using existing folder: $($DestinationFolder)" -Verbose
-        } 
-        Else 
-        {
-            mkdir "$($DestinationFolder)"
-        }
+
 
 #Output
 <#CompHardware#>
@@ -437,7 +554,15 @@ $CompHardware = [PSCustomObject]@{
     'Timestamp' = $date;
 }
 Write-Output $CompHardware
-$CompHardware | Export-Csv -Path $DestinationFolder\CompHardware.csv -Append -NoTypeInformation
+
+$GetCompHardware = Get-Content .\Computers\CompHardware.csv | Select-String -Pattern $BIOS.SerialNumber
+if ($null -eq $GetCompHardware) {
+    $CompHardware | Export-Csv -Path $DestinationFolder\CompHardware.csv -Append -NoTypeInformation
+}
+else {
+    Write-Verbose "Device already in database. Skipping hardware..."
+}
+
 
 <#CompSystem#>
 $CompSystem = [PSCustomObject]@{
@@ -506,7 +631,7 @@ $CompSystem = [PSCustomObject]@{
     'Timestamp' = $date;
 }
 Write-Output $CompSystem
-$CompSystem | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoTypeInformation
+$CompSystem | Export-Csv -Path $DestinationFolder\OLDCompSystem.csv -Append -NoTypeInformation
 
     <#Inventory Full#>
             $InventoryFull = [PSCustomObject]@{
@@ -635,6 +760,7 @@ $CompSystem | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoType
     foreach ($file in Get-ChildItem $DestinationFolder\*.csv)    #Selects the files
     {
         (Get-Content $file) -replace '"','' | Set-Content $file    #Replaces quotes with a blank space
+        (Get-Content $file) -replace "VMware, Inc.","VMware Inc." | Set-Content $file   #remove once NetAdapter is in table object
     }
 
 # #Errors
@@ -647,4 +773,4 @@ $CompSystem | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoType
 }
 
 
-Get-Inventory -DestinationFolder $DestinationFolder
+Get-Inventory -DestinationFolder $DestinationFolder -Verbose
