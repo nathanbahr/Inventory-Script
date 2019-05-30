@@ -99,21 +99,21 @@ $Win32PhysicalMemory | Select-Object Caption, Description, InstallDate, Name, St
         'Timestamp'                               = $date;
     }
 
-    $TestCPUCSV = Test-Path ".\Computers\CompCPU.csv"
+<#     $TestCPUCSV = Test-Path ".\Computers\CompCPU.csv"
     If ($TestCPUCSV -eq $true) {
         Write-Verbose "Using existing folder: .\Computers\CompCPU.csv" -Verbose
     } 
     Else {
         New-Item -ItemType File -Path .\Computers -Name CompCPU.csv
-    }
+    } #>
 
-<#     $GetCompCPU = Get-Content .\Computers\CompCPU.csv | Select-String -Pattern ($Win32Processor.Name)
+    $GetCompCPU = Get-Content .\Computers\CompCPU.csv | Select-String -Pattern ($Win32Processor.Name)
     if ($null -eq $GetCompCPU) {
         $CompCPU | Export-Csv -Path $DestinationFolder\CompCPU.csv -Append -NoTypeInformation
     }
     else {
         Write-Verbose "CPU already in database. Skipping..."
-    } #>
+    }
    
 
 
@@ -562,21 +562,21 @@ $CompHardware = [PSCustomObject]@{
 }
 Write-Verbose $CompHardware
 
-$TestHardwareCSV = Test-Path ".\Computers\CompHardware.csv"
+<# $TestHardwareCSV = Test-Path ".\Computers\CompHardware.csv"
 If ($TestHardwareCSV -eq $true) {
     Write-Verbose "Using existing folder: .\Computers\CompHardware.csv" -Verbose
 } 
 Else {
     New-Item -ItemType File -Path .\Computers -Name CompHardware.csv
-}
+} #>
 
-<# $GetCompHardware = Get-Content .\Computers\CompHardware.csv | Select-String -Pattern $BIOS.SerialNumber
+$GetCompHardware = Get-Content .\Computers\CompHardware.csv | Select-String -Pattern $BIOS.SerialNumber
 if ($null -eq $GetCompHardware) {
     $CompHardware | Export-Csv -Path $DestinationFolder\CompHardware.csv -Append -NoTypeInformation
 }
 else {
     Write-Verbose "Device already in database. Skipping hardware..."
-} #>
+}
 
 
 <#CompSystem#>
