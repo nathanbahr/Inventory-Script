@@ -99,6 +99,14 @@ $Win32PhysicalMemory | Select-Object Caption, Description, InstallDate, Name, St
         'Timestamp'                               = $date;
     }
 
+    $TestCPUCSV = Test-Path ".\Computers\CompCPU.csv"
+    If ($TestCPUCSV -eq $true) {
+        Write-Verbose "Using existing folder: .\Computers\CompCPU.csv" -Verbose
+    } 
+    Else {
+        New-Item -ItemType File -Path .\Computers -Name CompCPU.csv
+    }
+
     $GetCompCPU = Get-Content .\Computers\CompCPU.csv | Select-String -Pattern $Win32Processor.Name
     if ($null -eq $GetCompCPU) {
         $CompCPU | Export-Csv -Path $DestinationFolder\CompCPU.csv -Append -NoTypeInformation
@@ -552,7 +560,15 @@ $CompHardware = [PSCustomObject]@{
     'Architecture' = $system.SystemType
     'Timestamp' = $date;
 }
-Write-Output $CompHardware
+Write-Verbose $CompHardware
+
+$TestHardwareCSV = Test-Path ".\Computers\CompHardware.csv"
+If ($TestHardwareCSV -eq $true) {
+    Write-Verbose "Using existing folder: .\Computers\CompHardware.csv" -Verbose
+} 
+Else {
+    New-Item -ItemType File -Path .\Computers -Name CompHardware.csv
+}
 
 $GetCompHardware = Get-Content .\Computers\CompHardware.csv | Select-String -Pattern $BIOS.SerialNumber
 if ($null -eq $GetCompHardware) {
