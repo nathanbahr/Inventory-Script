@@ -105,15 +105,15 @@ $Win32PhysicalMemory | Select-Object Caption, Description, InstallDate, Name, St
     } 
     Else {
         New-Item -ItemType File -Path .\Computers -Name CompCPU.csv
-    } #>
+    }
 
     $GetCompCPU = Get-Content .\Computers\CompCPU.csv | Select-String -Pattern ($Win32Processor.Name)
-    if ($null -eq $GetCompCPU) {
+    if ($null -eq $GetCompCPU) { #>
         $CompCPU | Export-Csv -Path $DestinationFolder\CompCPU.csv -Append -NoTypeInformation
-    }
+<#     }
     else {
         Write-Verbose "CPU already in database. Skipping..."
-    }
+    } #>
    
 
 
@@ -568,15 +568,15 @@ If ($TestHardwareCSV -eq $true) {
 } 
 Else {
     New-Item -ItemType File -Path .\Computers -Name CompHardware.csv
-} #>
+}
 
 $GetCompHardware = Get-Content .\Computers\CompHardware.csv | Select-String -Pattern $BIOS.SerialNumber
-if ($null -eq $GetCompHardware) {
+if ($null -eq $GetCompHardware) { #>
     $CompHardware | Export-Csv -Path $DestinationFolder\CompHardware.csv -Append -NoTypeInformation
-}
+<# }
 else {
     Write-Verbose "Device already in database. Skipping hardware..."
-}
+} #>
 
 
 <#CompSystem#>
