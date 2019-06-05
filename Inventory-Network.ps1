@@ -522,6 +522,9 @@ else{
             Write-Output "Current user does not have administrator privileges."
         }
 
+If ($System.Manufacturer -Like "Dell") {
+    $SupportWebsite =  "https://www.dell.com/support/home/us/en/19/product-support/servicetag/$($System.Manufacturer)/warranty"
+}
 
 
 #Output
@@ -557,7 +560,8 @@ $CompHardware = [PSCustomObject]@{
     'Capacity' = "$CDriveCapacity GB";
     'WindowsKey' = $ProductKey;
     'OSName' = $os.Caption -replace 'Microsoft ','';
-    'Architecture' = $system.SystemType
+    'Architecture' = $system.SystemType;
+    'SupportWebsite' = $SupportWebsite;
     'Timestamp' = $date;
 }
 Write-Verbose $CompHardware
