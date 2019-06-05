@@ -25,7 +25,7 @@ $DestinationFolderPath = Test-Path $DestinationFolder
 $ComputerName = hostname
 
 #Date
-    $Date =  Get-Date -Format "yyyy-MM-dd HH:mm:ss:ffff"
+    $Date =  Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 #CIM
 $System = Get-WmiObject Win32_ComputerSystem
