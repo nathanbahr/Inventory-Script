@@ -522,8 +522,8 @@ else{
             Write-Output "Current user does not have administrator privileges."
         }
 
-If ($System.Manufacturer -Like "Dell") {
-    $SupportWebsite =  "https://www.dell.com/support/home/us/en/19/product-support/servicetag/$($System.Manufacturer)/warranty"
+If ($System.Manufacturer -Like "Dell Inc.") {
+    $SupportWebsite =  "https://www.dell.com/support/home/us/en/19/product-support/servicetag/$($bios.SerialNumber)/warranty"
 }
 
 
