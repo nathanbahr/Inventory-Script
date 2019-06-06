@@ -28,14 +28,14 @@ $ComputerName = hostname
     $Date =  Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 #CIM
-$System = Get-WmiObject Win32_ComputerSystem
-$SoftwareLicensing = Get-WmiObject SoftwareLicensingService
-$Win32Processor = Get-CimInstance Win32_Processor
-$Win32DiskDrive = Get-CimInstance Win32_DiskDrive
-$Win32MSFTPhysicalDisk = Get-CimInstance MSFT_PhysicalDisk -Namespace Root\Microsoft\Windows\Storage
-$WinOperatingSystem =  Get-CimInstance Win32_OperatingSystem
-$Win32PhysicalMemory = Get-CimInstance Win32_PhysicalMemory
-$VidDriver = Get-CimInstance win32_VideoController
+    $System = Get-WmiObject Win32_ComputerSystem
+    $SoftwareLicensing = Get-WmiObject SoftwareLicensingService
+    $Win32Processor = Get-CimInstance Win32_Processor
+    $Win32DiskDrive = Get-CimInstance Win32_DiskDrive
+    $Win32MSFTPhysicalDisk = Get-CimInstance MSFT_PhysicalDisk -Namespace Root\Microsoft\Windows\Storage
+    $WinOperatingSystem = Get-CimInstance Win32_OperatingSystem
+    $Win32PhysicalMemory = Get-CimInstance Win32_PhysicalMemory
+    $VidDriver = Get-CimInstance win32_VideoController
 
 #IP octets
     $ipID = ipconfig | Where-Object {$_ -match "IPv4 Address"} | ForEach-Object{$_.Split(":")[1]}
@@ -399,38 +399,48 @@ $CMediaType = (Get-CimInstance MSFT_PhysicalDisk -Namespace Root\Microsoft\Windo
         <#https://blogs.technet.microsoft.com/heyscriptingguy/2014/10/11/weekend-scripter-use-powershell-to-calculate-and-display-percentages/#>
 
 
+#ADD FORMAT TYPE (GPT, MBR, ETC.) FROM GET-DISK TO LOGICAL DIRVES
+
 #Drives
-$LogicalDrives = $Win32DiskDrive | ForEach-Object {
-    $disk = $_
-    $partitions = "ASSOCIATORS OF " +
-                    "{Win32_DiskDrive.DeviceID='$($disk.DeviceID)'} " +
-                    "WHERE AssocClass = Win32_DiskDriveToDiskPartition"
-    Get-WmiObject -Query $partitions | ForEach-Object {
-        $partition = $_
-        $drives = "ASSOCIATORS OF " +
-                "{Win32_DiskPartition.DeviceID='$($partition.DeviceID)'} " +
-                "WHERE AssocClass = Win32_LogicalDiskToPartition"
-        Get-WmiObject -Query $drives | ForEach-Object {
-            [PSCustomObject]@{
-            Disk        = $disk.DeviceID
-            DiskModel   = $disk.Model
-            Partition   = $partition.Name  -replace ",", "";
-            RawSize     = $partition.Size  |ForEach-Object {[math]::Round($_ / 1GB,2)}
-            DriveLetter = $_.DeviceID
-            VolumeName  = $_.VolumeName
-            Size        = $_.Size  |ForEach-Object {[math]::Round($_ / 1GB,2)}
-            FreeSpace   = $_.FreeSpace  |ForEach-Object {[math]::Round($_ / 1GB,2)}
-            FileSystem  = $_.FileSystem
-            InstallDate = $_.InstallDate
-            MaximumComponentLength = $_.MaximumComponentLength
-            MediaType   = $_.MediaType
-            VolumeSerialNumber = $_.VolumeSerialNumber
-            'ComputerName' = $ComputerName;
-            'ComputerSerialNumber' = $bios.SerialNumber;
-            'Timestamp' = $date;
+    $LogicalDrives = $Win32DiskDrive | ForEach-Object {
+        $disk = $_
+        $partitions = "ASSOCIATORS OF " +
+        "{Win32_DiskDrive.DeviceID='$($disk.DeviceID)'} " +
+        "WHERE AssocClass = Win32_DiskDriveToDiskPartition"
+        Get-WmiObject -Query $partitions | ForEach-Object {
+            $partition = $_
+            $drives = "ASSOCIATORS OF " +
+            "{Win32_DiskPartition.DeviceID='$($partition.DeviceID)'} " +
+            "WHERE AssocClass = Win32_LogicalDiskToPartition"
+            Get-WmiObject -Query $drives | ForEach-Object {
+                [PSCustomObject]@{
+                    Disk                   = $disk.DeviceID;
+                    DiskModel              = $disk.Model;
+                    Partition              = $partition.Name -replace ",", "";
+                    RawSize                = $partition.Size | ForEach-Object { [math]::Round($_ / 1GB, 2) }
+                    DriveLetter            = $_.DeviceID
+                    VolumeName             = $_.VolumeName
+                    Size                   = $_.Size | ForEach-Object { [math]::Round($_ / 1GB, 2) }
+                    FreeSpace              = $_.FreeSpace | ForEach-Object { [math]::Round($_ / 1GB, 2) }
+                    FileSystem             = $_.FileSystem
+                    MaximumComponentLength = $_.MaximumComponentLength
+                    MediaType              = $_.MediaType
+                    VolumeSerialNumber     = $_.VolumeSerialNumber
+                    Partitions             = $disk.Partitions;
+                    BytesPerSector         = $disk.BytesPerSector;
+                    InterfaceType          = $disk.InterfaceType;
+                    SectorsPerTrack        = $disk.SectorsPerTrack;
+                    TotalCylinders         = $disk.TotalCylinders;
+                    TotalHeads             = $disk.TotalHeads;
+                    TotalSectors           = $disk.TotalSectors;
+                    TotalTracks            = $disk.TotalTracks;
+                    TracksPerCylinder      = $disk.TracksPerCylinder;
+                    'ComputerName'         = $ComputerName;
+                    'ComputerSerialNumber' = $bios.SerialNumber;
+                    'Timestamp'            = $date;
+                }
+            }
         }
-        }
-    }
     }
     $LogicalDrives | Export-Csv -Path $DestinationFolder\LogicalDrives.csv -Append -NoTypeInformation
 
