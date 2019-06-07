@@ -280,16 +280,33 @@ $Printer = Get-Printer
 
 #Google Drive
     $GoogleDrive = Get-Process *googledrive*
-    If ([string]::IsNullOrEmpty($GoogleDrive)) 
-    {
+    If ([string]::IsNullOrEmpty($GoogleDrive)) {
         $GoogleDrive = Write-Output "Stopped"
         Write-Verbose "Googele Drive: Stopped" -Verbose
     }
-    Else
-    {
+    Else {
         $GoogleDrive = Write-Output "Running"
         Write-Verbose "Googele Drive: Running" -Verbose
     }
+
+
+#G Suite Sync
+    IF ($system.SystemType -eq "X86-based PC") {
+        $GSuiteKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{CCE9211C-DF42-46CF-B0C5-4800C4882881}'
+    }
+    Else{
+        $GSuiteKey = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{CCE9211C-DF42-46CF-B0C5-4800C4882881}'
+    }
+    $GSuiteTest = Test-Path $GSuiteKey
+        If ($GSuiteTest -eq "True") {
+            $GSuite = Get-ItemProperty $GSuiteKey
+            Write-Verbose "G Suite Sync: $($GSuite.DisplayVersion)"
+        } 
+        Else {
+            $GSuite = Write-Output 'N/A'
+            Write-Verbose "G Suite Sync not installed"
+        }
+
 
 #McAfee
     $McAfeeKey = 'HKLM:\SOFTWARE\Wow6432Node\McAfee\Agent\'
@@ -623,6 +640,7 @@ else {
         'TeamViewerVersion'    = $TeamViewerVersion
         'TeamViewerID'         = $TeamViewerID;
         'GoogeleDrive'         = $GoogleDrive;
+        'GSuite'               = $GSuite.DisplayVersion;
         'DiskUsed'             = "$CDriveUsed GB";
         'DiskFree'             = "$CDriveFree GB";
         'DiskPctUsed'          = $CDrivePercentUsed;
