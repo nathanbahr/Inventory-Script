@@ -109,7 +109,7 @@ $Win32PhysicalMemory | Select-Object Caption, Description, InstallDate, Name, St
 
     $GetCompCPU = Get-Content .\Computers\CompCPU.csv | Select-String -Pattern ($Win32Processor.Name)
     if ($null -eq $GetCompCPU) { #>
-        $CompCPU | Export-Csv -Path $DestinationFolder\CompCPU.csv -Append -NoTypeInformation
+        $CompCPU | Export-Csv -Path $DestinationFolder\CPU.csv -Append -NoTypeInformation
 <#     }
     else {
         Write-Verbose "CPU already in database. Skipping..."
@@ -713,7 +713,7 @@ else {
         'Timestamp'            = $date;
     }
     Write-Output $CompSystem
-    $CompSystem | Export-Csv -Path $DestinationFolder\OLDCompSystem.csv -Append -NoTypeInformation
+    $CompSystem | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoTypeInformation
 
 <#Inventory Full#>
     $InventoryFull = [PSCustomObject]@{
@@ -809,7 +809,7 @@ else {
 
 #Printers
     $CompPrinters = $Printer | Select-Object Name, DriverName, PortName, Shared, @{label='ComputerName';e={$ComputerName}}, @{label='SerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}}
-    $CompPrinters | Export-Csv -Path $DestinationFolder\CompPrinters.csv -Append -NoTypeInformation
+    $CompPrinters | Export-Csv -Path $DestinationFolder\Printers.csv -Append -NoTypeInformation
 
 # remove quotes
     foreach ($file in Get-ChildItem $DestinationFolder\*.csv)    #Selects the files
