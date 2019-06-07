@@ -337,17 +337,18 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
 
     
 #TeamViewer
-    $TeamViewerKey = 'HKLM:\SOFTWARE\WOW6432Node\TeamViewer\Version9'
+    $TeamViewerKey = 'HKLM:\SOFTWARE\WOW6432Node\TeamViewer'
     $TeamViewerTest = Test-Path $TeamViewerKey
-        If ($TeamViewerTest -eq "True") 
-        {
-            $TeamViewer = Get-ItemProperty $TeamViewerKey
-            Write-Verbose "TeamViewer: $($TeamViewer.ClientID)" -Verbose
-        } 
-        Else
-        {
-            Write-Output "TeamViewer: NULL"
-        }      
+        If ($TeamViewerTest -eq "True") {
+            $TeamViewerVersion = (Get-ItemProperty $TeamViewerKey).Version
+            $TeamViewerID = (Get-ItemProperty $TeamViewerKey).ClientID           
+        }
+        Else{
+            Write-Output "TeamViewer not installed"
+        }
+
+        Write-Verbose "TeamViewer Version: $TeamViewerVersion" -Verbose
+        Write-Verbose "TeamViewer 14 ID: $TeamViewerID" -Verbose
 
 #System
     $os = Get-WmiObject Win32_operatingSystem
@@ -383,6 +384,8 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
 
 $CDisk = Get-Disk -Number 0     #https://docs.microsoft.com/en-us/powershell/module/storage/get-disk?view=win10-ps
 
+$BootDrive = Get-Disk |Where-Object {$_.BootFromDisk -eq $true}
+
     #$Volume = Get-Volume    #Requires Windows 8 or newer. Using "Get-PSDrive" instead.
     $CDriveModel = ($Win32DiskDrive | Where-Object {$_.deviceID -eq "\\.\PHYSICALDRIVE0"}).Model
     $CDrive = Get-PSDrive -Name C
@@ -397,6 +400,9 @@ $CMediaType = (Get-CimInstance MSFT_PhysicalDisk -Namespace Root\Microsoft\Windo
         
         <#Get-Volume -DriveLetter C | select @{L="PercentUsed";E={($_.sizeremaining/$_.size).ToString("P")}}#>
         <#https://blogs.technet.microsoft.com/heyscriptingguy/2014/10/11/weekend-scripter-use-powershell-to-calculate-and-display-percentages/#>
+
+
+        
 
 
 #ADD FORMAT TYPE (GPT, MBR, ETC.) FROM GET-DISK TO LOGICAL DIRVES
@@ -538,7 +544,7 @@ If ($System.Manufacturer -Like "Dell Inc.") {
 
 
 #Output
-<#CompHardware#>
+    <#CompHardware#>
     $CompHardware = [PSCustomObject]@{
         'Hostname'          = $ComputerName;
         'SerialNumber'      = $bios.SerialNumber;
@@ -557,10 +563,6 @@ If ($System.Manufacturer -Like "Dell Inc.") {
         'LogicalCores'      = $CPU.NumberOfLogicalProcessors;
         'MaxFrequency'      = $MaxGHz;
         'Memory'            = "$memory GB";
-        'Username'          = $user;
-        'AdminPrivileges'   = $AdminPrivileges;
-        'DesktopPath'       = $DesktopPath;
-        'TeamViewer'        = $TeamViewer.ClientID;
         'AMDGPU'            = $AMDVidDriverName.Name;
         'NVIDIAGPU'         = $NVIDIAVidDriverName.Name;
         'IntelGPU'          = $IntelVidDriverName.Name;
@@ -593,7 +595,7 @@ else {
 } #>
 
 
-<#CompSystem#>
+    <#CompSystem#>
     $CompSystem = [PSCustomObject]@{
         'Hostname'             = $ComputerName;
         'SerialNumber'         = $bios.SerialNumber;
@@ -618,11 +620,13 @@ else {
         'Username'             = $user;
         'AdminPrivileges'      = $AdminPrivileges;
         'DesktopPath'          = $DesktopPath;
-        'TeamViewer'           = $TeamViewer.ClientID;
+        'TeamViewerVersion'    = $TeamViewerVersion
+        'TeamViewerID'         = $TeamViewerID;
         'GoogeleDrive'         = $GoogleDrive;
         'DiskUsed'             = "$CDriveUsed GB";
         'DiskFree'             = "$CDriveFree GB";
         'DiskPctUsed'          = $CDrivePercentUsed;
+        'PartitionStyle'       = $BootDrive.PartitionStyle;
         'DomainFW'             = $DomainFW;
         'PrivateFW'            = $PrivateFW;
         'PublicFW'             = $PublicFW;
@@ -694,7 +698,7 @@ else {
         'Username'            = $user;
         'Admin Privileges'    = $AdminPrivileges;
         'Desktop Path'        = $DesktopPath;
-        'TeamViewer'          = $TeamViewer.ClientID;
+        'TeamViewer'          = $TeamViewerID;
         'AMD GPU'             = $AMDVidDriverName.Name;
         'NVIDIA GPU'          = $NVIDIAVidDriverName.Name;
         'Intel GPU'           = $IntelVidDriverName.Name;
