@@ -544,16 +544,29 @@ else{
 
 
 #Microsoft Office 2013
-$Office2013RegKey = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{90150000-0012-0000-0000-0000000FF1CE}'
-$Office2013Test = Test-Path $Office2013RegKey
-    If ($Office2013Test -eq "True") {
-        $Office2013 = Get-ItemProperty $Office2013RegKey
-        Write-Verbose "G Suite Sync: $($Office2013.DisplayVersion)"
-    } 
-    Else {
-        $Office2013 = Write-Output 'N/A'
-        Write-Verbose "Office 2013 not installed"
-    }
+    $Office2013RegKey = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{90150000-0012-0000-0000-0000000FF1CE}'
+    $Office2013Test = Test-Path $Office2013RegKey
+        If ($Office2013Test -eq "True") {
+            $Office2013 = Get-ItemProperty $Office2013RegKey
+            Write-Verbose "Office 2013: $($Office2013.DisplayVersion)"
+        } 
+        Else {
+            $Office2013 = Write-Output 'N/A'
+            Write-Verbose "Office 2013 not installed"
+        }
+
+
+#Malwarebytes Anti-Malware
+    $MBAMRegKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{35065F43-4BB2-439A-BFF7-0F1014F2E0CD}_is1'
+    $MBAMTest = Test-Path $MBAMRegKey
+        If ($MBAMTest -eq "True") {
+            $MBAM = Get-ItemProperty $MBAMRegKey
+            Write-Verbose "Malwarebytes Anti-Malware: $($MBAM.DisplayVersion)"
+        } 
+        Else {
+            $MBAM = Write-Output 'N/A'
+            Write-Verbose "Malwarebytes Anti-Malware not installed"
+        }
 
 
 #Account Permissions
@@ -568,9 +581,11 @@ $Office2013Test = Test-Path $Office2013RegKey
             Write-Output "Current user does not have administrator privileges."
         }
 
-If ($System.Manufacturer -Like "Dell Inc.") {
-    $SupportWebsite =  "https://www.dell.com/support/home/us/en/19/product-support/servicetag/$($bios.SerialNumber)/warranty"
-}
+
+#Support Website
+    If ($System.Manufacturer -Like "Dell Inc.") {
+        $SupportWebsite =  "https://www.dell.com/support/home/us/en/19/product-support/servicetag/$($bios.SerialNumber)/warranty"
+    }
 
 
 #Output
@@ -688,8 +703,9 @@ else {
         'NVIDIA Driver'        = $NVIDIAVidDriverVersion.DriverVersion;
         'Intel Driver'         = $IntelVidDriverVersion.DriverVersion;
         'McAfee'               = $McAfeeAgent;
-        'Office2013Name'     = $Office2013.DisplayName;
-        'Office2013Ver'     = $Office2013.DisplayVersion;
+        'Office2013Name'       = $Office2013.DisplayName;
+        'Office2013Ver'        = $Office2013.DisplayVersion;
+        'MBAM'                 = $MBAM.DisplayVersion;
         'IP1'                  = $oct0;
         'IP2'                  = $oct1;
         'IP3'                  = $oct2;
