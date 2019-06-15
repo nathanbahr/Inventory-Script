@@ -96,6 +96,7 @@ $Win32PhysicalMemory | Select-Object Caption, Description, InstallDate, Name, St
         'ThreadCount'                             = $Win32Processor.ThreadCount;
         'UniqueId'                                = $Win32Processor.UniqueId;
         'UpgradeMethod'                           = $Win32Processor.UpgradeMethod;
+        'ComputerSerialNumber'                    = $bios.SerialNumber;
         'Timestamp'                               = $date;
     }
 
