@@ -38,7 +38,7 @@ $DesktopPath = [Environment]::GetFolderPath("Desktop")
     $Win32MSFTPhysicalDisk = Get-CimInstance MSFT_PhysicalDisk -Namespace Root\Microsoft\Windows\Storage
     $WinOperatingSystem = Get-CimInstance Win32_OperatingSystem
     $Win32PhysicalMemory = Get-CimInstance Win32_PhysicalMemory
-    $VidDriver = Get-CimInstance win32_VideoController
+    $VideoController = Get-CimInstance win32_VideoController
 
 #IP octets
     $ipID = ipconfig | Where-Object {$_ -match "IPv4 Address"} | ForEach-Object{$_.Split(":")[1]}
@@ -58,12 +58,31 @@ $Win32DiskDrive | Select-Object PSComputerName, ConfigManagerErrorCode, LastErro
 
 $Win32MSFTPhysicalDisk |Select-Object ClassName, Usage, OperationalStatus, UniqueIdFormat, HealthStatus, BusType, CannotPoolReason, SupportedUsages, MediaType, SpindleSpeed, ObjectId, PassThroughClass, PassThroughIds, PassThroughNamespace, PassThroughServer, UniqueId, Description, FriendlyName, Manufacturer, Model, OperationalDetails, PhysicalLocation, SerialNumber, AdapterSerialNumber, AllocatedSize, CanPool, DeviceId, EnclosureNumber, FirmwareVersion, IsIndicationEnabled, IsPartial, LogicalSectorSize, OtherCannotPoolReasonDescription, PartNumber, PhysicalSectorSize, Size, SlotNumber, SoftwareVersion, StoragePoolUniqueId, VirtualDiskFootprint, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\PhysicalDisk.csv -Append -NoTypeInformation
 
+#System
+Write-Output "Windows: $($SoftwareLicensing.Version)"
+$ProductKey = $SoftwareLicensing.OA3xOriginalProductKey 
+Write-Verbose "Key: $ProductKey" -Verbose
+
+
+Write-Output "CPU: $( $Win32Processor.Name)"
+$MaxGHz =  $Win32Processor | ForEach-Object {[math]::Round($_.MaxClockSpeed / 10)}    #Rounds the clock speed to go from MHz to GHz.
+$MaxGHz = "$($MaxGHz / 100) GHz"    #Adds the decimal place and GHz label.
+
+#Memory
+$memory = Get-WmiObject Win32_computersystem | ForEach-Object {[math]::round($_.totalPhysicalMemory / 1GB)}   #Displays the amount of system memory rounded to the nearest gigabyte.
+Write-Output "RAM: $($memory) GB"
+
+$FreeMemory = [math]::Round($WinOperatingSystem.FreePhysicalMemory/1mb,2)
+$FreeMemoryPercent = [math]::Round(($WinOperatingSystem.FreePhysicalMemory/$WinOperatingSystem.TotalVisibleMemorySize)*100,2)
+
+
+
 $WinOperatingSystem | Select-Object Status, Name, FreePhysicalMemory, FreeSpaceInPagingFiles, FreeVirtualMemory, Caption, Description, InstallDate, CreationClassName, CSCreationClassName, CSName, CurrentTimeZone, Distributed, LastBootUpTime, LocalDateTime, MaxNumberOfProcesses, MaxProcessMemorySize, NumberOfLicensedUsers, NumberOfProcesses, NumberOfUsers, OSType, OtherTypeDescription, SizeStoredInPagingFiles, TotalSwapSpaceSize, TotalVirtualMemorySize, TotalVisibleMemorySize, Version, BootDevice, BuildNumber, BuildType, CodeSet, CountryCode, CSDVersion, DataExecutionPrevention_32BitApplications, DataExecutionPrevention_Available, DataExecutionPrevention_Drivers, DataExecutionPrevention_SupportPolicy, Debug, EncryptionLevel, ForegroundApplicationBoost, LargeSystemCache, Locale, Manufacturer, MUILanguages, OperatingSystemSKU, Organization, OSArchitecture, OSLanguage, OSProductSuite, PAEEnabled, PlusProductID, PlusVersionNumber, PortableOperatingSystem, Primary, ProductType, RegisteredUser, SerialNumber, ServicePackMajorVersion, ServicePackMinorVersion, SuiteMask, SystemDevice, SystemDirectory, SystemDrive, WindowsDirectory, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompOS.csv -Append -NoTypeInformation
 
 $Win32PhysicalMemory | Select-Object Caption, Description, InstallDate, Name, Status, CreationClassName, Manufacturer, Model, OtherIdentifyingInfo, PartNumber, PoweredOn, SerialNumber, SKU, Tag, Version, HotSwappable, Removable, Replaceable, FormFactor, BankLabel, Capacity, DataWidth, InterleavePosition, MemoryType, PositionInRow, Speed, TotalWidth, Attributes, ConfiguredClockSpeed, ConfiguredVoltage, DeviceLocator, InterleaveDataDepth, MaxVoltage, MinVoltage, SMBIOSMemoryType, TypeDetail, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompMemory.csv -Append -NoTypeInformation
 
 
-<#CompCPU#>
+<#CPU#>
     $CompCPU = [PSCustomObject]@{
         'ExtClock'                                = $Win32Processor.ExtClock;
         'L2CacheSize'                             = $Win32Processor.L2CacheSize
@@ -118,10 +137,42 @@ $Win32PhysicalMemory | Select-Object Caption, Description, InstallDate, Name, St
     else {
         Write-Verbose "CPU already in database. Skipping..."
     } #>
-   
 
-
-$VidDriver |Select-Object Caption, Description, InstallDate, Name, Status, Availability, ConfigManagerErrorCode, ConfigManagerUserConfig, CreationClassName, DeviceID, ErrorCleared, ErrorDescription, LastErrorCode, PNPDeviceID, PowerManagementCapabilities, PowerManagementSupported, StatusInfo, SystemCreationClassName, SystemName, MaxNumberControlled, ProtocolSupported, TimeOfLastReset, AcceleratorCapabilities, CapabilityDescriptions, CurrentBitsPerPixel, CurrentHorizontalResolution, CurrentNumberOfColors, CurrentNumberOfColumns, CurrentNumberOfRows, CurrentRefreshRate, CurrentScanMode, CurrentVerticalResolution, MaxMemorySupported, MaxRefreshRate, MinRefreshRate, NumberOfVideoPages, VideoMemoryType, VideoProcessor, NumberOfColorPlanes, VideoArchitecture, VideoMode, AdapterCompatibility, AdapterDACType, AdapterRAM, ColorTableEntries, DeviceSpecificPens, DitherType, DriverDate, DriverVersion, ICMIntent, ICMMethod, InfFilename, InfSection, InstalledDisplayDrivers, Monochrome, ReservedSystemPaletteEntries, SpecificationVersion, SystemPaletteEntries, VideoModeDescription, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompGPU.csv -Append -NoTypeInformation
+<#GPU#>  
+    $CompGPU = [PSCustomObject]@{
+        'InstallDate'                 = $VideoController.InstallDate;
+        'Name'                        = $VideoController.Name;
+        'Status'                      = $VideoController.Status;
+        'Availability'                = $VideoController.Availability;
+        'ConfigManagerErrorCode'      = $VideoController.ConfigManagerErrorCode;
+        'ConfigManagerUserConfig'     = $VideoController.ConfigManagerUserConfig;
+        'DeviceID'                    = $VideoController.DeviceID;
+        'CurrentHorizontalResolution' = $VideoController.CurrentHorizontalResolution;
+        'CurrentNumberOfColors'       = $VideoController.CurrentNumberOfColors;
+        'CurrentNumberOfColumns'      = $VideoController.CurrentNumberOfColumns;
+        'CurrentNumberOfRows'         = $VideoController.CurrentNumberOfRows;
+        'CurrentRefreshRate'          = $VideoController.CurrentRefreshRate;
+        'CurrentScanMode'             = $VideoController.CurrentScanMode;
+        'CurrentVerticalResolution'   = $VideoController.CurrentVerticalResolution;
+        'MaxRefreshRate'              = $VideoController.MaxRefreshRate;
+        'MinRefreshRate'              = $VideoController.MinRefreshRate;
+        'VideoMemoryType'             = $VideoController.VideoMemoryType;
+        'VideoProcessor'              = $VideoController.VideoProcessor;
+        'VideoArchitecture'           = $VideoController.VideoArchitecture;
+        'AdapterCompatibility'        = $VideoController.AdapterCompatibility -replace ",", "";
+        'AdapterDACType'              = $VideoController.AdapterDACType;
+        'AdapterRAM'                  = $VideoController.AdapterRAM;
+        'DitherType'                  = $VideoController.DitherType;
+        'DriverDate'                  = $VideoController.DriverDate;
+        'DriverVersion'               = $VideoController.DriverVersion;
+        'InfFilename'                 = $VideoController.InfFilename;
+        'InfSection'                  = $VideoController.InfSection;
+        'VideoModeDescription'        = $VideoController.VideoModeDescription
+        'UpgradeMethod'               = $Win32Processor.UpgradeMethod;
+        'ComputerSerialNumber'        = $bios.SerialNumber;
+        'Timestamp'                   = $date;
+    }
+    $CompGPU | Export-Csv -Path $DestinationFolder\GPU.csv -Append -NoTypeInformation
 
 Get-NetAdapter |Select-Object MacAddress, Status, LinkSpeed, MediaType, PhysicalMediaType, AdminStatus, MediaConnectionState, DriverInformation, DriverFileName, NdisVersion, ifOperStatus, ifAlias, InterfaceAlias, ifIndex, ifDesc, ifName, DriverVersion, LinkLayerAddress, Caption, Description, ElementName, InstanceID, CommunicationStatus, DetailedStatus, HealthState, InstallDate, Name, OperatingStatus, OperationalStatus, PrimaryStatus, StatusDescriptions, AvailableRequestedStates, EnabledDefault, EnabledState, OtherEnabledState, RequestedState, TimeOfLastStateChange, TransitioningToState, AdditionalAvailability, Availability, CreationClassName, DeviceID, ErrorCleared, ErrorDescription, IdentifyingDescriptions, LastErrorCode, MaxQuiesceTime, OtherIdentifyingInfo, PowerManagementCapabilities, PowerManagementSupported, PowerOnHours, StatusInfo, SystemCreationClassName, SystemName, TotalPowerOnHours, MaxSpeed, OtherPortType, PortType, RequestedSpeed, Speed, UsageRestriction, ActiveMaximumTransmissionUnit, AutoSense, FullDuplex, LinkTechnology, NetworkAddresses, OtherLinkTechnology, OtherNetworkPortType, PermanentAddress, PortNumber, SupportedMaximumTransmissionUnit, AdminLocked, ComponentID, ConnectorPresent, DeviceName, DeviceWakeUpEnable, DriverDate, DriverDateData, DriverDescription, DriverMajorNdisVersion, DriverMinorNdisVersion, DriverName, DriverProvider, DriverVersionString, EndPointInterface, HardwareInterface, Hidden, HigherLayerInterfaceIndices, IMFilter, InterfaceAdminStatus, InterfaceDescription, InterfaceGuid, InterfaceIndex, InterfaceName, InterfaceOperationalStatus, InterfaceType, iSCSIInterface, LowerLayerInterfaceIndices, MajorDriverVersion, MediaConnectState, MediaDuplexState, MinorDriverVersion, MtuSize, NdisMedium, NdisPhysicalMedium, NetLuid, NetLuidIndex, NotUserRemovable, OperationalStatusDownDefaultPortNotAuthenticated, OperationalStatusDownInterfacePaused, OperationalStatusDownLowPowerState, OperationalStatusDownMediaDisconnected, PnPDeviceID, PromiscuousMode, ReceiveLinkSpeed, State, TransmitLinkSpeed, Virtual, VlanID, WdmInterface, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\CompNetAdapter.csv -Append -NoTypeInformation
 
@@ -371,24 +422,6 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
         Write-Verbose "TeamViewer Version: $TeamViewerVersion" -Verbose
         Write-Verbose "TeamViewer 14 ID: $TeamViewerID" -Verbose
 
-#System
-    $os = Get-WmiObject Win32_operatingSystem
-        Write-Output "Windows: $($SoftwareLicensing.Version)"
-        $ProductKey = $SoftwareLicensing.OA3xOriginalProductKey 
-        Write-Verbose "Key: $ProductKey" -Verbose
-
-    $CPU = Get-WmiObject Win32_Processor     #Gets information on the CPU
-        Write-Output "CPU: $($CPU.Name)"
-        $MaxGHz = $CPU | ForEach-Object {[math]::Round($_.MaxClockSpeed / 10)}    #Rounds the clock speed to go from MHz to GHz.
-        $MaxGHz = "$($MaxGHz / 100) GHz"    #Adds the decimal place and GHz label.
-        
-#Memory
-    $memory = Get-WmiObject Win32_computersystem | ForEach-Object {[math]::round($_.totalPhysicalMemory / 1GB)}   #Displays the amount of system memory rounded to the nearest gigabyte.
-        Write-Output "RAM: $($memory) GB"
-       
-        $FreeMemory = [math]::Round($os.FreePhysicalMemory/1mb,2)
-        $FreeMemoryPercent = [math]::Round(($os.FreePhysicalMemory/$os.TotalVisibleMemorySize)*100,2)
-
 
 
 
@@ -499,7 +532,7 @@ else{
 #Video Driver
     
 
-        $AMDVidDriver = $VidDriver | Where-Object {$_.Name -like "*AMD*" -or $_.Name -like "*Radeon*"}
+        $AMDVidDriver = $VideoController | Where-Object {$_.Name -like "*AMD*" -or $_.Name -like "*Radeon*"}
         If ([string]::IsNullOrEmpty($AMDVidDriver))    #Sees if an AMD GPU is instlled
         {
             $AMDVidDriver = 'NULL'    #If not, mark as empty
@@ -515,13 +548,13 @@ else{
 
 
         
-        If ([string]::IsNullOrEmpty($($VidDriver | Where-Object {$_.Name -Like "*Intel*"})))    #Sees if an Intel GPU is instlled
+        If ([string]::IsNullOrEmpty($($VideoController | Where-Object {$_.Name -Like "*Intel*"})))    #Sees if an Intel GPU is instlled
         {
             $IntelVidDriver = 'NULL'
         } 
         Else 
         {
-            $IntelVidDriver = $VidDriver | Where-Object {$_.Name -Like "*Intel*"}
+            $IntelVidDriver = $VideoController | Where-Object {$_.Name -Like "*Intel*"}
             $IntelVidDriverVersion = $IntelVidDriver | Select-Object DriverVersion -First 1
             $IntelVidDriverName = $IntelVidDriver | Select-Object Name -First 1
             Write-Output "$($IntelVidDriverName.Name)"    #GPU model name
@@ -530,13 +563,13 @@ else{
         }
             
         
-        If ([string]::IsNullOrEmpty($($VidDriver | Where-Object {$_.Name -Like "*NVIDIA*"})))    #Sees if a NVIDIA GPU is instlled
+        If ([string]::IsNullOrEmpty($($VideoController | Where-Object {$_.Name -Like "*NVIDIA*"})))    #Sees if a NVIDIA GPU is instlled
         {
             $NVIDIAVidDriver = 'NULL'
         }
         Else
         {
-            $NVIDIAVidDriver = $VidDriver | Where-Object {$_.Name -Like "*NVIDIA*"}
+            $NVIDIAVidDriver = $VideoController | Where-Object {$_.Name -Like "*NVIDIA*"}
             $NVIDIAVidDriverVersion = $NVIDIAVidDriver | Select-Object DriverVersion -First 1
             $NVIDIAVidDriverName = $NVIDIAVidDriver | Select-Object Name -First 1
             Write-Output "$($NVIDIAVidDriverName.Name)"
@@ -605,9 +638,9 @@ else{
         'WiFiState'         = $WiFiAdapter.Status;
         'WiFiMAC'           = $WiFiAdapter.MacAddress;
         'WiFiSpeed'         = $WiFiAdapter.LinkSpeed;
-        'CPUName'           = $CPU.Name;
-        'PhysicalCores'     = $CPU.NumberOfCores;
-        'LogicalCores'      = $CPU.NumberOfLogicalProcessors;
+        'CPUName'           =  $Win32Processor.Name;
+        'PhysicalCores'     =  $Win32Processor.NumberOfCores;
+        'LogicalCores'      = $Win32Processor.NumberOfLogicalProcessors;
         'MaxFrequency'      = $MaxGHz;
         'Memory'            = "$memory GB";
         'AMDGPU'            = $AMDVidDriverName.Name;
@@ -618,7 +651,7 @@ else{
         'BusType'           = $CDisk.BusType;
         'Capacity'          = "$CDriveCapacity GB";
         'WindowsKey'        = $ProductKey;
-        'OSName'            = $os.Caption -replace 'Microsoft ', '';
+        'OSName'            = $WinOperatingSystem.Caption -replace 'Microsoft ', '';
         'Architecture'      = $system.SystemType;
         'SupportWebsite'    = $SupportWebsite;
         'Timestamp'         = $date;
@@ -687,7 +720,7 @@ else {
         'D_BLProtection'       = $DDBLProtectionStatus;
         'D_BLPct'              = $DBLEncryptionPercentage;
         'OS Number'            = $SoftwareLicensing.version;
-        'OS Build'             = $os.BuildNumber;
+        'OS Build'             = $WinOperatingSystem.BuildNumber;
         'SMBIOS'               = $bios.SMBIOSBIOSVersion;
         'BIOS Version'         = $bios.Version;
         'BIOS Date/Name'       = $bios.Name;
@@ -738,9 +771,9 @@ else {
         'MAC Address'         = $network.MACAddress;
         'Network Adapter'     = $network.Description;
         'Adapter Type'        = $netAdapter;
-        'CPU Name'            = $CPU.Name;
-        'Physical Cores'      = $CPU.NumberOfCores;
-        'Logical Cores'       = $CPU.NumberOfLogicalProcessors;
+        'CPU Name'            =  $Win32Processor.Name;
+        'Physical Cores'      =  $Win32Processor.NumberOfCores;
+        'Logical Cores'       = $Win32Processor.NumberOfLogicalProcessors;
         'Max Frequency'       = $MaxGHz;
         'Memory'              = "$memory GB";
         'Free Memory'         = "$FreeMemory GB";
@@ -770,9 +803,9 @@ else {
         'BL ID'               = '';
         'BL Key'              = '';
         'Windows Key'         = $ProductKey;
-        'OS Name'             = $os.Caption -replace 'Microsoft ', '';
+        'OS Name'             = $WinOperatingSystem.Caption -replace 'Microsoft ', '';
         'OS Number'           = $SoftwareLicensing.version;
-        'OS Build'            = $os.BuildNumber;
+        'OS Build'            = $WinOperatingSystem.BuildNumber;
         'SMBIOS'              = $bios.SMBIOSBIOSVersion;
         'BIOS Version'        = $bios.Version;
         'BIOS Date/Name'      = $bios.Name;
