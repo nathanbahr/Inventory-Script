@@ -23,12 +23,15 @@ $DestinationFolderPath = Test-Path $DestinationFolder
 
 
 $ComputerName = hostname
+$user = $env:username
+$DesktopPath = [Environment]::GetFolderPath("Desktop")
 
 #Date
     $Date =  Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 #CIM
-    $System = Get-WmiObject Win32_ComputerSystem
+    $System = Get-CimInstance Win32_ComputerSystem
+    $BIOS = Get-CimInstance Win32_BIOS
     $SoftwareLicensing = Get-WmiObject SoftwareLicensingService
     $Win32Processor = Get-CimInstance Win32_Processor
     $Win32DiskDrive = Get-CimInstance Win32_DiskDrive
@@ -386,9 +389,7 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
         $FreeMemory = [math]::Round($os.FreePhysicalMemory/1mb,2)
         $FreeMemoryPercent = [math]::Round(($os.FreePhysicalMemory/$os.TotalVisibleMemorySize)*100,2)
 
-    $bios = Get-WmiObject Win32_bios
-    $user = $env:username
-    $DesktopPath = [Environment]::GetFolderPath("Desktop")
+
 
 
 #Firewall
