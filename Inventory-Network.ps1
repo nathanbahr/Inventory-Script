@@ -58,6 +58,9 @@ $Win32DiskDrive | Select-Object PSComputerName, ConfigManagerErrorCode, LastErro
 
 $Win32MSFTPhysicalDisk |Select-Object ClassName, Usage, OperationalStatus, UniqueIdFormat, HealthStatus, BusType, CannotPoolReason, SupportedUsages, MediaType, SpindleSpeed, ObjectId, PassThroughClass, PassThroughIds, PassThroughNamespace, PassThroughServer, UniqueId, Description, FriendlyName, Manufacturer, Model, OperationalDetails, PhysicalLocation, SerialNumber, AdapterSerialNumber, AllocatedSize, CanPool, DeviceId, EnclosureNumber, FirmwareVersion, IsIndicationEnabled, IsPartial, LogicalSectorSize, OtherCannotPoolReasonDescription, PartNumber, PhysicalSectorSize, Size, SlotNumber, SoftwareVersion, StoragePoolUniqueId, VirtualDiskFootprint, PSComputerName, @{label='ComputerName';e={$ComputerName}}, @{label='CompSerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date}} | Export-Csv -Path $DestinationFolder\PhysicalDisk.csv -Append -NoTypeInformation
 
+
+
+
 #System
 Write-Output "Windows: $($SoftwareLicensing.Version)"
 $ProductKey = $SoftwareLicensing.OA3xOriginalProductKey 
@@ -638,8 +641,8 @@ else{
         'WiFiState'         = $WiFiAdapter.Status;
         'WiFiMAC'           = $WiFiAdapter.MacAddress;
         'WiFiSpeed'         = $WiFiAdapter.LinkSpeed;
-        'CPUName'           =  $Win32Processor.Name;
-        'PhysicalCores'     =  $Win32Processor.NumberOfCores;
+        'CPUName'           = $Win32Processor.Name;
+        'PhysicalCores'     = $Win32Processor.NumberOfCores;
         'LogicalCores'      = $Win32Processor.NumberOfLogicalProcessors;
         'MaxFrequency'      = $MaxGHz;
         'Memory'            = "$memory GB";
@@ -675,80 +678,145 @@ else {
 } #>
 
 
-    <#CompSystem#>
+<#CompSystem#>
     $CompSystem = [PSCustomObject]@{
-        'Hostname'             = $ComputerName;
-        'SerialNumber'         = $bios.SerialNumber;
-        'EthernetIPv4'         = $EthernetIPv4;
-        'EthtIPv4Prefix'       = $EthernetIPv4.PrefixLength;
-        'EthIPv4PrefixOrigin'  = $EthernetIPv4.PrefixOrigin;
-        'EthernetIPv6'         = $EthernetIPv6;
-        'EthtIPv6Prefix'       = $EthernetIPv6.PrefixLength;
-        'EthtIPv6PrefixOrigin' = $EthernetIPv6.PrefixOrigin;
-        'WiFiIPv4'             = $WiFiIPv4;
-        'WiFiIPv4Prefix'       = $WiFiIPv4.PrefixLength;
-        'WiFiIPv4PrefixOrigin' = $WiFiIPv4.PrefixOrigin;
-        'WiFiIPv6'             = $WiFiIPv6;
-        'WiFiIPv6Prefix'       = $WiFiIPv6.PrefixLength;
-        'WiFiIPv6PrefixOrigin' = $WiFiIPv6.PrefixOrigin;
-        'DefaultGateway'       = $network.DefaultIPGateway[0];
-        'PrimaryDNS'           = $DNS;
-        'BackupDNS'            = $DNSBackup;
-        'Domain'               = $system.Domain;
-        'FreeMemory'           = "$FreeMemory GB";
-        'MemPctUsed'           = "$FreeMemoryPercent %";
-        'Username'             = $user;
-        'AdminPrivileges'      = $AdminPrivileges;
-        'DesktopPath'          = $DesktopPath;
-        'TeamViewerVersion'    = $TeamViewerVersion
-        'TeamViewerID'         = $TeamViewerID;
-        'GoogeleDrive'         = $GoogleDrive;
-        'GSuite'               = $GSuite.DisplayVersion;
-        'DiskUsed'             = "$CDriveUsed GB";
-        'DiskFree'             = "$CDriveFree GB";
-        'DiskPctUsed'          = $CDrivePercentUsed;
-        'PartitionStyle'       = $BootDrive.PartitionStyle;
-        'DomainFW'             = $DomainFW;
-        'PrivateFW'            = $PrivateFW;
-        'PublicFW'             = $PublicFW;
-        'C_BitLocker'          = $CBLProtectionStatus;
-        'C_BLVolume'           = $CBLVolumeStatus;
-        'C_BLProtection'       = $CDBLProtectionStatus;
-        'C_BLPct'              = $CBLEncryptionPercentage;
-        'D_BitLocker'          = $DBLProtectionStatus;
-        'D_BLVolume'           = $DBLVolumeStatus;
-        'D_BLProtection'       = $DDBLProtectionStatus;
-        'D_BLPct'              = $DBLEncryptionPercentage;
-        'OS Number'            = $SoftwareLicensing.version;
-        'OS Build'             = $WinOperatingSystem.BuildNumber;
-        'SMBIOS'               = $bios.SMBIOSBIOSVersion;
-        'BIOS Version'         = $bios.Version;
-        'BIOS Date/Name'       = $bios.Name;
-        'Internet Explorer'    = $IE.svcVersion;
-        'Firefox 32-bit'       = $Firefox.DisplayVersion;
-        'Firefox 64-bit'       = $Firefox64.DisplayVersion;
-        'Chrome'               = $Chrome.Version;
-        'Flash'                = $Flash;
-        'Flash NPAPI'          = $FlashNPAPI.Version;
-        'Flash PPAPI'          = $FlashPPAPI.Version;
-        'Java'                 = $Java.DisplayVersion;
-        'Adobe Reader'         = $Reader.DisplayVersion;
-        'PowerShell'           = $PSVersionTable.PSVersion;
-        'AMD Driver'           = $AMDVidDriverVersion.DriverVersion;
-        'NVIDIA Driver'        = $NVIDIAVidDriverVersion.DriverVersion;
-        'Intel Driver'         = $IntelVidDriverVersion.DriverVersion;
-        'McAfee'               = $McAfeeAgent;
-        'Office2013Name'       = $Office2013.DisplayName;
-        'Office2013Ver'        = $Office2013.DisplayVersion;
-        'MBAM'                 = $MBAM.DisplayVersion;
-        'IP1'                  = $oct0;
-        'IP2'                  = $oct1;
-        'IP3'                  = $oct2;
-        'IP4'                  = $oct3;
-        'Timestamp'            = $date;
+        'Hostname'                                  = $ComputerName;
+        'SerialNumber'                              = $bios.SerialNumber;
+        'EthernetIPv4'                              = $EthernetIPv4;
+        'EthtIPv4Prefix'                            = $EthernetIPv4.PrefixLength;
+        'EthIPv4PrefixOrigin'                       = $EthernetIPv4.PrefixOrigin;
+        'EthernetIPv6'                              = $EthernetIPv6;
+        'EthtIPv6Prefix'                            = $EthernetIPv6.PrefixLength;
+        'EthtIPv6PrefixOrigin'                      = $EthernetIPv6.PrefixOrigin;
+        'WiFiIPv4'                                  = $WiFiIPv4;
+        'WiFiIPv4Prefix'                            = $WiFiIPv4.PrefixLength;
+        'WiFiIPv4PrefixOrigin'                      = $WiFiIPv4.PrefixOrigin;
+        'WiFiIPv6'                                  = $WiFiIPv6;
+        'WiFiIPv6Prefix'                            = $WiFiIPv6.PrefixLength;
+        'WiFiIPv6PrefixOrigin'                      = $WiFiIPv6.PrefixOrigin;
+        'DefaultGateway'                            = $network.DefaultIPGateway[0];
+        'PrimaryDNS'                                = $DNS;
+        'BackupDNS'                                 = $DNSBackup;
+        'Domain'                                    = $system.Domain;
+        'FreeMemory'                                = "$FreeMemory GB";
+        'MemPctUsed'                                = "$FreeMemoryPercent %";
+        'Username'                                  = $user;
+        'AdminPrivileges'                           = $AdminPrivileges;
+        'DesktopPath'                               = $DesktopPath;
+        'TeamViewerVersion'                         = $TeamViewerVersion
+        'TeamViewerID'                              = $TeamViewerID;
+        'GoogeleDrive'                              = $GoogleDrive;
+        'GSuite'                                    = $GSuite.DisplayVersion;
+        'DiskUsed'                                  = "$CDriveUsed GB";
+        'DiskFree'                                  = "$CDriveFree GB";
+        'DiskPctUsed'                               = $CDrivePercentUsed;
+        'PartitionStyle'                            = $BootDrive.PartitionStyle;
+        'DomainFW'                                  = $DomainFW;
+        'PrivateFW'                                 = $PrivateFW;
+        'PublicFW'                                  = $PublicFW;
+        'C_BitLocker'                               = $CBLProtectionStatus;
+        'C_BLVolume'                                = $CBLVolumeStatus;
+        'C_BLProtection'                            = $CDBLProtectionStatus;
+        'C_BLPct'                                   = $CBLEncryptionPercentage;
+        'D_BitLocker'                               = $DBLProtectionStatus;
+        'D_BLVolume'                                = $DBLVolumeStatus;
+        'D_BLProtection'                            = $DDBLProtectionStatus;
+        'D_BLPct'                                   = $DBLEncryptionPercentage;
+        'OS_Version'                                = $SoftwareLicensing.Version;
+        'OS_Build'                                  = $WinOperatingSystem.BuildNumber;
+        'SMBIOS'                                    = $bios.SMBIOSBIOSVersion;
+        'BIOS Version'                              = $bios.Version;
+        'BIOS Date/Name'                            = $bios.Name;
+        'Internet Explorer'                         = $IE.svcVersion;
+        'Firefox 32-bit'                            = $Firefox.DisplayVersion;
+        'Firefox 64-bit'                            = $Firefox64.DisplayVersion;
+        'Chrome'                                    = $Chrome.Version;
+        'Flash'                                     = $Flash;
+        'Flash NPAPI'                               = $FlashNPAPI.Version;
+        'Flash PPAPI'                               = $FlashPPAPI.Version;
+        'Java'                                      = $Java.DisplayVersion;
+        'Adobe Reader'                              = $Reader.DisplayVersion;
+        'PowerShell'                                = $PSVersionTable.PSVersion;
+        'AMD Driver'                                = $AMDVidDriverVersion.DriverVersion;
+        'NVIDIA Driver'                             = $NVIDIAVidDriverVersion.DriverVersion;
+        'Intel Driver'                              = $IntelVidDriverVersion.DriverVersion;
+        'McAfee'                                    = $McAfeeAgent;
+        'Office2013Name'                            = $Office2013.DisplayName;
+        'Office2013Ver'                             = $Office2013.DisplayVersion;
+        'MBAM'                                      = $MBAM.DisplayVersion;
+        'IP1'                                       = $oct0;
+        'IP2'                                       = $oct1;
+        'IP3'                                       = $oct2;
+        'IP4'                                       = $oct3;
+        'Timestamp'                                 = $date;
+        'FreePhysicalMemory'                        = $WinOperatingSystem.FreePhysicalMemory;
+        'FreeSpaceInPagingFiles'                    = $WinOperatingSystem.FreeSpaceInPagingFiles;
+        'FreeVirtualMemory'                         = $WinOperatingSystem.FreeVirtualMemory;
+        'OSInstallDate'                             = $WinOperatingSystem.InstallDate;
+        'CurrentTimeZone'                           = $WinOperatingSystem.CurrentTimeZone;
+        'LastBootUpTime'                            = $WinOperatingSystem.LastBootUpTime;
+        'Distributed'                               = $WinOperatingSystem.Distributed;
+        'LocalDateTime'                             = $WinOperatingSystem.LocalDateTime;
+        'MaxNumberOfProcesses'                      = $WinOperatingSystem.MaxNumberOfProcesses;
+        'MaxProcessMemorySize'                      = $WinOperatingSystem.MaxProcessMemorySize;
+        'NumberOfLicensedUsers'                     = $WinOperatingSystem.NumberOfLicensedUsers;
+        'NumberOfProcesses'                         = $WinOperatingSystem.NumberOfProcesses;
+        'NumberOfUsers'                             = $WinOperatingSystem.NumberOfUsers;
+        'OSType'                                    = $WinOperatingSystem.OSType;
+        'OtherTypeDescription'                      = $WinOperatingSystem.OtherTypeDescription;
+        'Caption'                                   = $WinOperatingSystem.Caption;
+        'SizeStoredInPagingFiles'                   = $WinOperatingSystem.SizeStoredInPagingFiles;
+        'TotalSwapSpaceSize'                        = $WinOperatingSystem.TotalSwapSpaceSize;
+        'TotalVirtualMemorySize'                    = $WinOperatingSystem.TotalVirtualMemorySize;
+        'TotalVisibleMemorySize'                    = $WinOperatingSystem.TotalVisibleMemorySize;
+        'BootDevice'                                = $WinOperatingSystem.BootDevice;
+        'BuildType'                                 = $WinOperatingSystem.BuildType;
+        'CodeSet'                                   = $WinOperatingSystem.CodeSet;
+        'CountryCode'                               = $WinOperatingSystem.CountryCode;
+        'CSDVersion'                                = $WinOperatingSystem.CSDVersion;
+        'DataExecutionPrevention_32BitApplications' = $WinOperatingSystem.DataExecutionPrevention_32BitApplications;
+        'DataExecutionPrevention_Available'         = $WinOperatingSystem.DataExecutionPrevention_Available;
+        'DataExecutionPrevention_Drivers'           = $WinOperatingSystem.DataExecutionPrevention_Drivers;
+        'DataExecutionPrevention_SupportPolicy'     = $WinOperatingSystem.DataExecutionPrevention_SupportPolicy;
+        'Debug'                                     = $WinOperatingSystem.Debug;
+        'EncryptionLevel'                           = $WinOperatingSystem.EncryptionLevel;
+        'ForegroundApplicationBoost'                = $WinOperatingSystem.ForegroundApplicationBoost;
+        'LargeSystemCache'                          = $WinOperatingSystem.LargeSystemCache;
+        'Locale'                                    = $WinOperatingSystem.Locale;
+        'Manufacturer'                              = $WinOperatingSystem.Manufacturer;
+        'MUILanguages'                              = $WinOperatingSystem.MUILanguages;
+        'OperatingSystemSKU'                        = $WinOperatingSystem.OperatingSystemSKU;
+        'Organization'                              = $WinOperatingSystem.Organization;
+        'OSArchitecture'                            = $WinOperatingSystem.OSArchitecture;
+        'OSLanguage'                                = $WinOperatingSystem.OSLanguage;
+        'OSProductSuite'                            = $WinOperatingSystem.OSProductSuite;
+        'PortableOperatingSystem'                   = $WinOperatingSystem.PortableOperatingSystem;
+        'Primary'                                   = $WinOperatingSystem.Primary;
+        'ProductType'                               = $WinOperatingSystem.ProductType;
+        'RegisteredUser'                            = $WinOperatingSystem.RegisteredUser;
+        'SerialNumber;'                             = $WinOperatingSystem.SerialNumber;
+        'ServicePackMajorVersion'                   = $WinOperatingSystem.ServicePackMajorVersion;
+        'ServicePackMinorVersion'                   = $WinOperatingSystem.ServicePackMinorVersion;
+        'SuiteMask'                                 = $WinOperatingSystem.SuiteMask;
+        'SystemDevice'                              = $WinOperatingSystem.SystemDevice;
+        'SystemDirectory'                           = $WinOperatingSystem.SystemDirectory;
+        'SystemDrive'                               = $WinOperatingSystem.SystemDrive;
+        'WindowsDirectory'                          = $WinOperatingSystem.WindowsDirectory;
     }
     Write-Output $CompSystem
     $CompSystem | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoTypeInformation
+
+
+    
+    
+    
+
+
+
+
+
+
+
 
 <#Inventory Full#>
     $InventoryFull = [PSCustomObject]@{
