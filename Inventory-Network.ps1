@@ -39,6 +39,7 @@ $DesktopPath = [Environment]::GetFolderPath("Desktop")
     $WinOperatingSystem = Get-CimInstance Win32_OperatingSystem
     $Win32PhysicalMemory = Get-CimInstance Win32_PhysicalMemory
     $VideoController = Get-CimInstance win32_VideoController
+    $NetAdapterConf = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -Filter "IpEnabled = $true"
 
 #IP octets
     $ipID = ipconfig | Where-Object {$_ -match "IPv4 Address"} | ForEach-Object{$_.Split(":")[1]}
@@ -216,7 +217,6 @@ $FreeMemoryPercent = [math]::Round(($WinOperatingSystem.FreePhysicalMemory/$WinO
         DriverFileName,
         NdisVersion,
         InterfaceAlias,
-        ifIndex,
         ifName,
         DriverVersion,
         Name,
@@ -259,7 +259,6 @@ $FreeMemoryPercent = [math]::Round(($WinOperatingSystem.FreePhysicalMemory/$WinO
         Store,
         AddressFamily,
         AddressState,
-        ifIndex,
         EnabledDefault,
         EnabledState,
         RequestedState,
@@ -278,6 +277,59 @@ $FreeMemoryPercent = [math]::Round(($WinOperatingSystem.FreePhysicalMemory/$WinO
         ValidLifetime,
         @{label = 'CompSerialNumber'; e = { $bios.SerialNumber } },
         @{label = 'Timestamp'; e = { $Date } } | Export-Csv -Path $DestinationFolder\NetIP.csv -Append -NoTypeInformation
+
+
+        $NetAdapterConf |Select-Object DHCPLeaseExpires,
+        Index,
+        Description,
+        DHCPEnabled,
+        DHCPLeaseObtained,
+        DHCPServer,
+        DNSDomain,
+        DNSDomainSuffixSearchOrder,
+        DNSEnabledForWINSResolution,
+        DNSServerSearchOrder,
+        DomainDNSRegistrationEnabled,
+        FullDNSRegistrationEnabled,
+        IPAddress,
+        IPConnectionMetric,
+        IPEnabled,
+        IPFilterSecurityEnabled,
+        WINSEnableLMHostsLookup,
+        WINSHostLookupFile,
+        WINSPrimaryServer,
+        WINSScopeID,
+        WINSSecondaryServer,
+        ArpAlwaysSourceRoute,
+        ArpUseEtherSNAP,
+        DatabasePath,
+        DeadGWDetectEnabled,
+        DefaultIPGateway,
+        GatewayCostMetric,
+        IGMPLevel,
+        InterfaceIndex,
+        IPPortSecurityEnabled,
+        IPSecPermitIPProtocols,
+        IPSecPermitTCPPorts,
+        IPSecPermitUDPPorts,
+        IPSubnet,
+        KeepAliveInterval,
+        KeepAliveTime,
+        MACAddress,
+        MTU,
+        NumForwardPackets,
+        PMTUBHDetectEnabled,
+        PMTUDiscoveryEnabled,
+        ServiceName,
+        SettingID,
+        TcpipNetbiosOptions,
+        TcpMaxConnectRetransmissions,
+        TcpMaxDataRetransmissions,
+        TcpNumConnections,
+        TcpUseRFC1122UrgentPointer,
+        TcpWindowSize,
+        @{label = 'CompSerialNumber'; e = { $bios.SerialNumber } },
+        @{label = 'Timestamp'; e = { $Date } } | Export-Csv -Path $DestinationFolder\NetConf.csv -Append -NoTypeInformation
 
 <#
 Get-CimInstance Win32_ComputerSystem |Select-Object AdminPasswordStatus, BootupState, ChassisBootupState, KeyboardPasswordStatus, PowerOnPasswordStatus, PowerSupplyState, PowerState, FrontPanelResetStatus, ThermalState, Status, Name, PowerManagementCapabilities, PowerManagementSupported, Caption, Description, InstallDate, CreationClassName, NameFormat, PrimaryOwnerContact, PrimaryOwnerName, Roles, InitialLoadInfo, LastLoadInfo, ResetCapability, AutomaticManagedPagefile, AutomaticResetBootOption, AutomaticResetCapability, BootOptionOnLimit, BootOptionOnWatchDog, BootROMSupported, BootStatus, ChassisSKUNumber, CurrentTimeZone, DaylightInEffect, DNSHostName, Domain, DomainRole, EnableDaylightSavingsTime, HypervisorPresent, InfraredSupported, Manufacturer, Model, NetworkServerModeEnabled, NumberOfLogicalProcessors, NumberOfProcessors, OEMLogoBitmap, OEMStringArray, PartOfDomain, PauseAfterReset, PCSystemType, PCSystemTypeEx, ResetCount, ResetLimit, SupportContactDescription, SystemFamily, SystemSKUNumber, SystemStartupDelay, SystemStartupOptions, SystemStartupSetting, SystemType, TotalPhysicalMemory, UserName, WakeUpType, Workgroup, PSComputerName,  @{label='SerialNumber';e={$bios.SerialNumber}}, @{label='Timestamp';e={$Date} | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoTypeInformation
@@ -490,8 +542,8 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
     $WiFiIPv6 = Get-NetIPAddress -InterfaceAlias Wi-Fi -AddressFamily IPv6
  }
 
-    $network = Get-WmiObject -Class "Win32_NetworkAdapterConfiguration" -ComputerName 127.0.0.1 -Filter "IpEnabled = TRUE"
-        If ($network.Description -like "*Wireless*") {
+    
+        If ($NetAdapterConf.Description -like "*Wireless*") {
             $netAdapter = "Wireless"
         } 
         Else {
@@ -499,15 +551,15 @@ If ($PSVersionTable.PSVersion.Major -gt 4) {
             $netAdapter =  $AdapterType.AdapterType
         }
 
-    $FirstIP = if ([string]::IsNullOrEmpty($network.IPAddress[0])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[0]}
-    $SecondIP = if ([string]::IsNullOrEmpty($network.IPAddress[1])) {Write-Output 'NULL'} else {Write-Output $network.IPAddress[1]}
-    $FirstSub = if ([string]::IsNullOrEmpty($network.IPSubnet[0])) {Write-Output 'NULL'} else {Write-Output $network.IPSubnet[0]}
-    $SecondSub = if ([string]::IsNullOrEmpty($network.IPSubnet[1])) {Write-Output 'NULL'} else {Write-Output $network.IPSubnet[1]}
+    $FirstIP = if ([string]::IsNullOrEmpty($NetAdapterConf.IPAddress[0])) {Write-Output 'NULL'} else {Write-Output $NetAdapterConf.IPAddress[0]}
+    $SecondIP = if ([string]::IsNullOrEmpty($NetAdapterConf.IPAddress[1])) {Write-Output 'NULL'} else {Write-Output $NetAdapterConf.IPAddress[1]}
+    $FirstSub = if ([string]::IsNullOrEmpty($NetAdapterConf.IPSubnet[0])) {Write-Output 'NULL'} else {Write-Output $NetAdapterConf.IPSubnet[0]}
+    $SecondSub = if ([string]::IsNullOrEmpty($NetAdapterConf.IPSubnet[1])) {Write-Output 'NULL'} else {Write-Output $NetAdapterConf.IPSubnet[1]}
 
-    $WINS = if ([string]::IsNullOrEmpty($network.WINSPrimaryServer)) {Write-Output 'NULL'} else {Write-Output $network.WINSPrimaryServer}
-    $WINSBackup = if ([string]::IsNullOrEmpty($network.WINSSecondaryServer)) {Write-Output 'NULL'} else {Write-Output $network.WINSSecondaryServer}
-    $DNS = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[0])) {Write-Output 'NULL'} else {Write-Output $network.DNSServerSearchOrder[0]}
-    $DNSBackup = if ([string]::IsNullOrEmpty($network.DNSServerSearchOrder[1])) {Write-Output 'NULL'} else {Write-Output $network.DNSServerSearchOrder[1]}
+    $WINS = if ([string]::IsNullOrEmpty($NetAdapterConf.WINSPrimaryServer)) {Write-Output 'NULL'} else {Write-Output $NetAdapterConf.WINSPrimaryServer}
+    $WINSBackup = if ([string]::IsNullOrEmpty($NetAdapterConf.WINSSecondaryServer)) {Write-Output 'NULL'} else {Write-Output $NetAdapterConf.WINSSecondaryServer}
+    $DNS = if ([string]::IsNullOrEmpty($NetAdapterConf.DNSServerSearchOrder[0])) {Write-Output 'NULL'} else {Write-Output $NetAdapterConf.DNSServerSearchOrder[0]}
+    $DNSBackup = if ([string]::IsNullOrEmpty($NetAdapterConf.DNSServerSearchOrder[1])) {Write-Output 'NULL'} else {Write-Output $NetAdapterConf.DNSServerSearchOrder[1]}
 
     
 #TeamViewer
@@ -793,7 +845,7 @@ else {
         'WiFiIPv6'                                  = $WiFiIPv6;
         'WiFiIPv6Prefix'                            = $WiFiIPv6.PrefixLength;
         'WiFiIPv6PrefixOrigin'                      = $WiFiIPv6.PrefixOrigin;
-        'DefaultGateway'                            = $network.DefaultIPGateway[0];
+        'DefaultGateway'                            = $NetAdapterConf.DefaultIPGateway[0];
         'PrimaryDNS'                                = $DNS;
         'BackupDNS'                                 = $DNSBackup;
         'Domain'                                    = $system.Domain;
@@ -901,42 +953,42 @@ else {
         'SystemDirectory'                           = $WinOperatingSystem.SystemDirectory;
         'SystemDrive'                               = $WinOperatingSystem.SystemDrive;
         'WindowsDirectory'                          = $WinOperatingSystem.WindowsDirectory;
+        'DHCP'                                      = $NetAdapterConf.DHCPEnabled[0];
+        'IPAddress'                                 = $FirstIP;
+        'SubnetMask'                                = $FirstSub;
+        'SecondIP'                                  = $SecondIP;
+        'SecondSubnet'                              = $SecondSub;
+        'PrimaryWINS'                               = $WINS;
+        'BackupWINS'                                = $WINSBackup;
+        'ActiveMACAddress'                          = $NetAdapterConf.MACAddress;
+        'NetworkAdapter'                            = $NetAdapterConf.Description;
+        'AdapterType'                               = $netAdapter;
     }
     Write-Output $CompSystem
     $CompSystem | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoTypeInformation
 
 
-    
-    
-    
 
-
-
-
-
-
-
-
-<#Inventory Full#>
+<#Inventory Full -- Remove once all items have moved to other respective tables#>
     $InventoryFull = [PSCustomObject]@{
         'Hostname'            = $ComputerName;
         'Timestamp'           = $date;
         'Serial Number'       = $bios.SerialNumber;
         'Manufacturer'        = $system.Manufacturer;
         'Model Number'        = $system.Model;
-        'DHCP'                = $network.DHCPEnabled[0];
+        'DHCP'                = $NetAdapterConf.DHCPEnabled[0];
         'IP Address'          = $FirstIP;
         'Subnet Mask'         = $FirstSub;
         'Second IP'           = $SecondIP;
         'Second Subnet'       = $SecondSub;
-        'Default Gateway'     = $network.DefaultIPGateway[0];
+        'Default Gateway'     = $NetAdapterConf.DefaultIPGateway[0];
         'Primary DNS'         = $DNS;
         'Backup DNS'          = $DNSBackup;
         'Primary WINS'        = $WINS;
         'Backup WINS'         = $WINSBackup;
         'Domain'              = $system.Domain;
-        'MAC Address'         = $network.MACAddress;
-        'Network Adapter'     = $network.Description;
+        'MAC Address'         = $NetAdapterConf.MACAddress;
+        'Network Adapter'     = $NetAdapterConf.Description;
         'Adapter Type'        = $netAdapter;
         'CPU Name'            =  $Win32Processor.Name;
         'Physical Cores'      =  $Win32Processor.NumberOfCores;
