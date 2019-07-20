@@ -48,7 +48,7 @@ $DesktopPath = [Environment]::GetFolderPath("Desktop")
     $oct2 = $ipID.trim().Split(".")[2]
     $oct3 = $ipID.trim().Split(".")[3]
 
-
+    $PublicIP = (Invoke-WebRequest -uri "http://icanhazip.com/").Content
 
 
 Get-Disk | Select-Object DiskNumber, PartitionStyle, ProvisioningType, OperationalStatus, HealthStatus, BusType, UniqueIdFormat, OfflineReason, ObjectId, PassThroughClass, PassThroughIds, PassThroughNamespace, PassThroughServer, UniqueId, AdapterSerialNumber, AllocatedSize, BootFromDisk, FirmwareVersion, FriendlyName, Guid, IsBoot, IsClustered, IsHighlyAvailable, IsOffline, IsReadOnly, IsScaleOut, IsSystem, LargestFreeExtent, Location, LogicalSectorSize, Manufacturer, Model, Number, NumberOfPartitions, Path, PhysicalSectorSize, SerialNumber, Signature, Size,
@@ -958,11 +958,12 @@ else {
         'SubnetMask'                                = $FirstSub;
         'SecondIP'                                  = $SecondIP;
         'SecondSubnet'                              = $SecondSub;
-        'PrimaryWINS'                               = $WINS;
-        'BackupWINS'                                = $WINSBackup;
-        'ActiveMACAddress'                          = $NetAdapterConf.MACAddress;
-        'NetworkAdapter'                            = $NetAdapterConf.Description;
-        'AdapterType'                               = $netAdapter;
+        'PrimaryWINS'                               = $WINS[0];
+        'BackupWINS'                                = $WINSBackup[0];
+        'ActiveMACAddress'                          = $NetAdapterConf.MACAddress[0];
+        'NetworkAdapter'                            = $NetAdapterConf.Description[0];
+        'AdapterType'                               = $netAdapter[0];
+        'PublicIP'                                  = $PublicIP.trim();
     }
     Write-Output $CompSystem
     $CompSystem | Export-Csv -Path $DestinationFolder\CompSystem.csv -Append -NoTypeInformation
@@ -990,8 +991,8 @@ else {
         'MAC Address'         = $NetAdapterConf.MACAddress;
         'Network Adapter'     = $NetAdapterConf.Description;
         'Adapter Type'        = $netAdapter;
-        'CPU Name'            =  $Win32Processor.Name;
-        'Physical Cores'      =  $Win32Processor.NumberOfCores;
+        'CPU Name'            = $Win32Processor.Name;
+        'Physical Cores'      = $Win32Processor.NumberOfCores;
         'Logical Cores'       = $Win32Processor.NumberOfLogicalProcessors;
         'Max Frequency'       = $MaxGHz;
         'Memory'              = "$memory GB";
