@@ -962,7 +962,7 @@ else {
         'BackupWINS'                                = $WINSBackup[0];
         'ActiveMACAddress'                          = $NetAdapterConf.MACAddress[0];
         'NetworkAdapter'                            = $NetAdapterConf.Description[0];
-        'AdapterType'                               = $netAdapter[0];
+        'AdapterType'                               = $netAdapter;
         'PublicIP'                                  = $PublicIP.trim();
     }
     Write-Output $CompSystem
